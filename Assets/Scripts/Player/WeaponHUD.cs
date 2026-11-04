@@ -1,0 +1,67 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+/// <summary>
+/// Scene-mounted single weapon display. The component never creates UI objects;
+/// it only mirrors the weapon currently equipped by PlayerInventory.
+/// </summary>
+public sealed class WeaponHUD : MonoBehaviour
+{
+    [SerializeField] private Image weaponImage;
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private Sprite backgroundSprite;
+    [SerializeField] private PlayerInventory inventory;
+
+    private void Awake()
+    {
+        if (weaponImage == null)
+        {
+            Transform icon = transform.Find("WeaponIcon");
+            weaponImage = icon == null ? GetComponent<Image>() : icon.GetComponent<Image>();
+        }
+        if (backgroundImage == null) backgroundImage = GetComponent<Image>();
+        if (backgroundSprite == null) backgroundSprite = ItemIconResolver.Resolve("Inventory");
+        if (backgroundImage != null && backgroundImage != weaponImage)
+        {
+            backgroundImage.sprite = backgroundSprite;
+            backgroundImage.color = Color.white;
+            backgroundImage.preserveAspect = true;
+        }
+        if (inventory == null) inventory = FindObjectOfType<PlayerInventory>();
+    }
+
+    private void OnEnable()
+    {
+        Subscribe();
+        Refresh();
+    }
+
+    private void Start()
+    {
+        Subscribe();
+        Refresh();
+    }
+
+    private void OnDisable()
+    {
+        if (inventory != null) inventory.Changed -= Refresh;
+    }
+
+    private void Refresh()
+    {
+        if (weaponImage == null) return;
+        Weapon weapon = inventory != null && inventory.Weapons.Count > 0
+            ? inventory.Weapons[Mathf.Clamp(inventory.EquippedIndex, 0, inventory.Weapons.Count - 1)]
+            : null;
+        weaponImage.sprite = weapon == null ? null : weapon.icon;
+        weaponImage.enabled = weapon != null && weapon.icon != null;
+        weaponImage.preserveAspect = true;
+    }
+
+    private void Subscribe()
+    {
+        if (inventory == null) inventory = FindObjectOfType<PlayerInventory>();
+        if (inventory != null) inventory.Changed -= Refresh;
+        if (inventory != null) inventory.Changed += Refresh;
+    }
+}
