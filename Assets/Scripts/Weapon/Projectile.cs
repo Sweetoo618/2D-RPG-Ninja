@@ -9,7 +9,22 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float lifetime = 3f;
     
-    public Vector3 Direction { get; set; }
+    private Vector3 _direction;
+
+    public Vector3 Direction
+    {
+        get => _direction;
+        set
+        {
+            _direction = value;
+            if (_direction.sqrMagnitude > 0.0001f)
+            {
+                float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            }
+        }
+    }
+
     public float Damage { get; set; }
 
     private void Start()

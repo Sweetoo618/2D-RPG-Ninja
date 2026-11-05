@@ -91,7 +91,7 @@ public sealed class CharacterPanelUI : MonoBehaviour
         _inventoryText.text = inventory == null ? "Inventory unavailable" : BuildInventoryText();
         if (_equipmentIcon != null)
         {
-            Weapon equipped = inventory != null && inventory.Weapons.Count > 0 ? inventory.Weapons[inventory.EquippedIndex] : null;
+            Weapon equipped = inventory == null ? null : inventory.EquippedWeapon;
             _equipmentIcon.sprite = equipped == null ? null : equipped.icon;
             _equipmentIcon.color = equipped == null ? new Color(0.16f, 0.17f, 0.21f, 1f) : Color.white;
             _equipmentLabel.text = equipped == null ? "Weapon slot: empty" : "Equipped: " + equipped.name;
@@ -100,7 +100,7 @@ public sealed class CharacterPanelUI : MonoBehaviour
 
     private string BuildInventoryText()
     {
-        System.Text.StringBuilder result = new System.Text.StringBuilder("WEAPONS  [Tab] next\n");
+        System.Text.StringBuilder result = new System.Text.StringBuilder("WEAPONS\n");
         for (int i = 0; i < inventory.Weapons.Count; i++)
         {
             Weapon weapon = inventory.Weapons[i];
@@ -109,8 +109,8 @@ public sealed class CharacterPanelUI : MonoBehaviour
                 .Append("  ").Append(weapon.damage).Append(" DMG\n");
         }
         result.Append("\nEQUIPMENT\nWeapon: ");
-        result.Append(inventory.Weapons.Count == 0 ? "Empty" : inventory.Weapons[inventory.EquippedIndex].name);
-        result.Append("\n\nITEMS  [I] use\n");
+        result.Append(inventory.EquippedWeapon == null ? "Empty" : inventory.EquippedWeapon.name);
+        result.Append("\n\nITEMS\n");
         for (int i = 0; i < inventory.Items.Count; i++)
             result.Append(inventory.Items[i].displayName).Append(" x").Append(inventory.Items[i].quantity).Append("\n");
         return result.ToString();

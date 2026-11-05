@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00ee64bb9af3f124a8bb357ebddc5fd8, type: 3}
   m_Name: Weapon_Bow
   m_EditorClassIdentifier: 
+  weaponName: Bow
+  description: A sturdy bow that fires sharp arrows.
   icon: {fileID: 21300000, guid: f43beb2b739d7654fadb6f7318b2f60e, type: 3}
   weaponType: 0
   damage: 1.5

@@ -18,13 +18,13 @@ public class PlayerAttack : MonoBehaviour
     private Coroutine _attackCoroutine;
 
     private Transform _currentAttackPosition;
-    private float _currentAttackRotation;
     private Vector2 _lastAttackDirection = Vector2.down;
     private Weapon _currentWeapon;
 
     public Weapon CurrentWeapon => _currentWeapon;
     public Weapon InitialWeapon => initialWeapon;
     public Weapon SecondaryWeapon => secondaryWeapon;
+    public event Action AttackPerformed;
 
     private void Awake()
     {
@@ -36,7 +36,6 @@ public class PlayerAttack : MonoBehaviour
         if (attackPositions != null && attackPositions.Length >= 4)
         {
             _currentAttackPosition = attackPositions[2];
-            _currentAttackRotation = 180f;
         }
     }
 
@@ -54,13 +53,19 @@ public class PlayerAttack : MonoBehaviour
     private void Attack()
     {
         if (DialogueManager.IsOpen) return;
-        if (_currentWeapon == null) return;
-        if (_currentWeapon.weaponType == WeaponType.Melee && _enemyTarget == null) return;
+        if (_currentWeapon == null || _enemyTarget == null) return;
+        StopAttack();
+        _attackCoroutine = StartCoroutine(IEAttack());
+    }
+
+    private void StopAttack()
+    {
         if (_attackCoroutine != null)
         {
             StopCoroutine(_attackCoroutine);
+            _attackCoroutine = null;
         }
-        _attackCoroutine = StartCoroutine(IEAttack());
+        if (_playerAnimations != null) _playerAnimations.SetAttackAnimation(false);
     }
 
     private IEnumerator IEAttack()
@@ -80,9 +85,8 @@ public class PlayerAttack : MonoBehaviour
         {
             if (_currentAttackPosition == null || _currentWeapon.projectilePrefab == null) yield break;
             if (_playerMana == null || _playerMana.CurrentMana < _currentWeapon.requiredMana) yield break;
-            Quaternion rotation = Quaternion.Euler(new Vector3(0f, 0f, _currentAttackRotation));
             Projectile projectile = Instantiate(_currentWeapon.projectilePrefab,
-                _currentAttackPosition.position, rotation);
+                _currentAttackPosition.position, Quaternion.identity);
             projectile.Direction = _lastAttackDirection;
             projectile.Damage = damage;
             _playerMana.UseMana(_currentWeapon.requiredMana);
@@ -95,9 +99,11 @@ public class PlayerAttack : MonoBehaviour
             if (Vector2.Distance(transform.position, _enemyTarget.transform.position) > meleeRange) yield break;
             targetHealth.TakeDamage(damage, isCritical);
         }
+        AttackPerformed?.Invoke();
         _playerAnimations.SetAttackAnimation(true);
         yield return new WaitForSeconds(0.5f);
         _playerAnimations.SetAttackAnimation(false);
+        _attackCoroutine = null;
     }
 
     private void GetFirePosition()
@@ -110,22 +116,18 @@ public class PlayerAttack : MonoBehaviour
         {
             case > 0f:
                 _currentAttackPosition = attackPositions[1];
-                _currentAttackRotation = -90f;
                 break;
             case < 0f:
                 _currentAttackPosition = attackPositions[3];
-                _currentAttackRotation = -270f;
                 break;
         }
         switch (moveDirection.y)
         {
             case > 0f:
                 _currentAttackPosition = attackPositions[0];
-                _currentAttackRotation = 0f;
                 break;
             case < 0f:
                 _currentAttackPosition = attackPositions[2];
-                _currentAttackRotation = -180f;
                 break;
         }
     }
@@ -133,6 +135,11 @@ public class PlayerAttack : MonoBehaviour
     public void EquipWeapon(Weapon weapon)
     {
         if (weapon != null) _currentWeapon = weapon;
+    }
+
+    public void UnequipWeapon()
+    {
+        _currentWeapon = null;
     }
     
     private void EnemySelectedCallback(EnemyBrain enemySelected)
@@ -154,6 +161,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDisable()
     {
+        StopAttack();
         if (_actions != null) _actions.Disable();
         SelectionManager.OnEnemySelectedEvent -= EnemySelectedCallback;
         SelectionManager.OnNoSelectionEvent -= NoEnemySelectionCallback;

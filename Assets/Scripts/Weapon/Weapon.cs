@@ -11,6 +11,10 @@ public enum WeaponType
 [CreateAssetMenu(fileName = "Weapon_")]
 public class Weapon : ScriptableObject
 {
+    [Header("Info")]
+    public string weaponName;
+    public string description;
+
     [Header("Config")]
     public Sprite icon;
     public WeaponType weaponType;

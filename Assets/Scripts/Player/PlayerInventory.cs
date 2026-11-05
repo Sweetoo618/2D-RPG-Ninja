@@ -6,16 +6,19 @@ public sealed class PlayerInventory : MonoBehaviour
 {
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private Weapon[] startingWeapons = new Weapon[4];
+    [SerializeField] private int startingWeaponQuantity;
     [SerializeField] private int capacity = 24;
     [SerializeField] private bool seedStarterItems = true;
 
     private readonly List<Weapon> _weapons = new List<Weapon>();
+    private readonly List<int> _weaponQuantities = new List<int>();
     private readonly List<InventoryItemStack> _items = new List<InventoryItemStack>();
     private int _equippedIndex;
     private Player _player;
 
     public IReadOnlyList<Weapon> Weapons => _weapons;
     public IReadOnlyList<InventoryItemStack> Items => _items;
+    public Weapon EquippedWeapon => _equippedIndex >= 0 && _equippedIndex < _weapons.Count ? _weapons[_equippedIndex] : null;
     public int EquippedIndex => _equippedIndex;
     public int Capacity => capacity;
     public event Action Changed;
@@ -29,24 +32,53 @@ public sealed class PlayerInventory : MonoBehaviour
         return names;
     }
 
-    public void RestoreByNames(string[] weaponNames, int equippedIndex)
+    public int[] GetWeaponQuantities()
+    {
+        int[] quantities = new int[_weaponQuantities.Count];
+        for (int i = 0; i < _weaponQuantities.Count; i++) quantities[i] = _weaponQuantities[i];
+        return quantities;
+    }
+
+    public bool HasWeapon(Weapon weapon)
+    {
+        return weapon != null && _weapons.Contains(weapon);
+    }
+
+    public int GetWeaponQuantity(Weapon weapon)
+    {
+        int index = _weapons.IndexOf(weapon);
+        return index >= 0 ? _weaponQuantities[index] : 0;
+    }
+
+    public void RestoreByNames(string[] weaponNames, int[] weaponQuantities, int equippedIndex)
     {
         if (weaponNames == null) return;
         _weapons.Clear();
+        _weaponQuantities.Clear();
         Weapon[] available = Resources.FindObjectsOfTypeAll<Weapon>();
         for (int i = 0; i < weaponNames.Length; i++)
         {
             if (string.IsNullOrEmpty(weaponNames[i])) continue;
+            int quantity = weaponQuantities != null && i < weaponQuantities.Length
+                ? weaponQuantities[i]
+                : startingWeaponQuantity;
+            if (quantity <= 0) continue;
             for (int j = 0; j < available.Length; j++)
             {
-                if (available[j] != null && available[j].name == weaponNames[i])
+                if (available[j] != null && available[j].name == weaponNames[i] && !_weapons.Contains(available[j]))
                 {
-                    AddWeapon(available[j]);
+                    _weapons.Add(available[j]);
+                    _weaponQuantities.Add(quantity);
                     break;
                 }
             }
         }
-        Equip(Mathf.Clamp(equippedIndex, 0, Mathf.Max(0, _weapons.Count - 1)));
+        _equippedIndex = equippedIndex >= 0 && equippedIndex < _weapons.Count ? equippedIndex : -1;
+        if (playerAttack != null)
+        {
+            if (_equippedIndex >= 0) playerAttack.EquipWeapon(_weapons[_equippedIndex]);
+            else playerAttack.UnequipWeapon();
+        }
         Changed?.Invoke();
     }
 
@@ -77,15 +109,6 @@ public sealed class PlayerInventory : MonoBehaviour
             SeedStarterItems();
     }
 
-    private void Update()
-    {
-        if (DialogueManager.IsOpen) return;
-        for (int i = 0; i < Mathf.Min(9, _weapons.Count); i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i)) Equip(i);
-        }
-    }
-
     public bool EquipWeapon(Weapon weapon)
     {
         int index = _weapons.IndexOf(weapon);
@@ -96,6 +119,44 @@ public sealed class PlayerInventory : MonoBehaviour
     {
         if (weapon == null || _weapons.Contains(weapon) || _weapons.Count >= capacity) return false;
         _weapons.Add(weapon);
+        _weaponQuantities.Add(Mathf.Max(1, startingWeaponQuantity));
+        Changed?.Invoke();
+        return true;
+    }
+
+    public bool RemoveWeapon(Weapon weapon)
+    {
+        int index = _weapons.IndexOf(weapon);
+        if (index < 0) return false;
+        _weapons.RemoveAt(index);
+        _weaponQuantities.RemoveAt(index);
+        if (_equippedIndex == index)
+        {
+            _equippedIndex = -1;
+            if (playerAttack != null) playerAttack.UnequipWeapon();
+        }
+        else if (_equippedIndex > index)
+        {
+            _equippedIndex--;
+        }
+        Changed?.Invoke();
+        return true;
+    }
+
+    public bool ConsumeEquippedWeapon(int amount = 1)
+    {
+        if (amount <= 0 || _equippedIndex < 0 || _equippedIndex >= _weapons.Count) return false;
+        int remaining = _weaponQuantities[_equippedIndex] - amount;
+        if (remaining > 0)
+        {
+            _weaponQuantities[_equippedIndex] = remaining;
+            Changed?.Invoke();
+            return true;
+        }
+        _weapons.RemoveAt(_equippedIndex);
+        _weaponQuantities.RemoveAt(_equippedIndex);
+        _equippedIndex = -1;
+        if (playerAttack != null) playerAttack.UnequipWeapon();
         Changed?.Invoke();
         return true;
     }
@@ -193,11 +254,26 @@ public sealed class PlayerInventory : MonoBehaviour
 
     public bool Equip(int index)
     {
-        if (index < 0 || index >= _weapons.Count || playerAttack == null) return false;
+        if (index < 0 || index >= _weapons.Count || _weaponQuantities[index] <= 0 || playerAttack == null) return false;
         _equippedIndex = index;
         playerAttack.EquipWeapon(_weapons[index]);
         Changed?.Invoke();
         return true;
     }
 
+    private void OnEnable()
+    {
+        if (playerAttack == null) playerAttack = GetComponent<PlayerAttack>();
+        if (playerAttack != null) playerAttack.AttackPerformed += ConsumeWeaponOnAttack;
+    }
+
+    private void OnDisable()
+    {
+        if (playerAttack != null) playerAttack.AttackPerformed -= ConsumeWeaponOnAttack;
+    }
+
+    private void ConsumeWeaponOnAttack()
+    {
+        ConsumeEquippedWeapon();
+    }
 }

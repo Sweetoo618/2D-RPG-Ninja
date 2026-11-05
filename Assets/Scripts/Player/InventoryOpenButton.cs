@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-/// <summary>Scene-mounted button entry point for the inventory panel.</summary>
+/// <summary>Scene-mounted button that toggles the inventory panel.</summary>
 public sealed class InventoryOpenButton : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private InventoryUI inventoryUI;
@@ -11,14 +11,16 @@ public sealed class InventoryOpenButton : MonoBehaviour, IPointerClickHandler
         if (inventoryUI == null) inventoryUI = FindObjectOfType<InventoryUI>();
     }
 
-    public void OpenInventory()
+    public void ToggleInventory()
     {
         if (inventoryUI == null) inventoryUI = FindObjectOfType<InventoryUI>();
-        inventoryUI?.Open();
+        if (inventoryUI == null) return;
+        if (inventoryUI.IsOpen) inventoryUI.Close();
+        else inventoryUI.Open();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        OpenInventory();
+        ToggleInventory();
     }
 }

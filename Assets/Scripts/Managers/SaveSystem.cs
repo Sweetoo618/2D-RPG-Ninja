@@ -16,12 +16,14 @@ public static class SaveSystem
         public bool questAccepted;
         public bool questRewardClaimed;
         public string[] weaponNames;
+        public int[] weaponQuantities;
         public int equippedWeaponIndex;
         public string[] itemIds;
         public int[] itemQuantities;
     }
 
     private static string[] _pendingWeaponNames;
+    private static int[] _pendingWeaponQuantities;
     private static int _pendingEquippedWeaponIndex;
     private static string[] _pendingItemIds;
     private static int[] _pendingItemQuantities;
@@ -47,7 +49,8 @@ public static class SaveSystem
             questAccepted = questManager != null && questManager.IsAccepted,
             questRewardClaimed = questManager != null && questManager.IsRewardClaimed,
             weaponNames = inventory == null ? null : inventory.GetWeaponNames(),
-            equippedWeaponIndex = inventory == null ? 0 : inventory.EquippedIndex,
+            weaponQuantities = inventory == null ? null : inventory.GetWeaponQuantities(),
+            equippedWeaponIndex = inventory == null ? -1 : inventory.EquippedIndex,
             itemIds = inventory == null ? null : inventory.GetItemIds(),
             itemQuantities = inventory == null ? null : inventory.GetItemQuantities()
         };
@@ -79,6 +82,7 @@ public static class SaveSystem
         questAccepted = data.questAccepted;
         questRewardClaimed = data.questRewardClaimed;
         _pendingWeaponNames = data.weaponNames;
+        _pendingWeaponQuantities = data.weaponQuantities;
         _pendingEquippedWeaponIndex = data.equippedWeaponIndex;
         _pendingItemIds = data.itemIds;
         _pendingItemQuantities = data.itemQuantities;
@@ -90,12 +94,13 @@ public static class SaveSystem
     public static void ApplyPendingInventory(PlayerInventory inventory)
     {
         if (!_hasPendingInventory || inventory == null) return;
-        inventory.RestoreByNames(_pendingWeaponNames, _pendingEquippedWeaponIndex);
+        inventory.RestoreByNames(_pendingWeaponNames, _pendingWeaponQuantities, _pendingEquippedWeaponIndex);
         inventory.RestoreItems(_pendingItemIds, _pendingItemQuantities);
         _pendingWeaponNames = null;
+        _pendingWeaponQuantities = null;
         _pendingItemIds = null;
         _pendingItemQuantities = null;
-        _pendingEquippedWeaponIndex = 0;
+        _pendingEquippedWeaponIndex = -1;
         _hasPendingInventory = false;
     }
 
