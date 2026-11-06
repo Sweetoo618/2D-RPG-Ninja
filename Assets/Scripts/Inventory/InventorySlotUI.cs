@@ -2,11 +2,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/// <summary>Controls one inventory slot's hover, item display and drag source.</summary>
+/// <summary>Controls one inventory slot's visual state, item display and drag source.</summary>
 public sealed class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
+    IPointerDownHandler, IPointerUpHandler, IPointerClickHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
     [SerializeField] private Image defaultImage;
+    [SerializeField] private Image hoverImage;
     [SerializeField] private Image checkImage;
     [SerializeField] private Image itemImage;
     [SerializeField] private Text countText;
@@ -16,10 +18,12 @@ public sealed class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPoin
     private Sprite _icon;
     private int _quantity;
     private bool _isHovered;
+    private bool _isPressed;
+    private bool _isSelected;
 
     private void Awake()
     {
-        ApplyHoverState();
+        ApplyVisualState();
         ApplyItem();
     }
 
@@ -36,18 +40,42 @@ public sealed class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPoin
         ApplyItem();
     }
 
+    public void SetSelected(bool selected)
+    {
+        _isSelected = selected;
+        ApplyVisualState();
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         _isHovered = true;
-        ApplyHoverState();
-        _owner?.HoverSlot(_index);
+        ApplyVisualState();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         _isHovered = false;
-        ApplyHoverState();
-        _owner?.ClearHover(_index);
+        _isPressed = false;
+        ApplyVisualState();
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
+        _isPressed = true;
+        ApplyVisualState();
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        _isPressed = false;
+        ApplyVisualState();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
+        _owner?.SelectSlot(_index);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -86,9 +114,11 @@ public sealed class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPoin
         }
     }
 
-    private void ApplyHoverState()
+    private void ApplyVisualState()
     {
-        if (defaultImage != null) defaultImage.gameObject.SetActive(!_isHovered);
-        if (checkImage != null) checkImage.gameObject.SetActive(_isHovered);
+        bool isChecked = _isSelected || _isPressed;
+        if (defaultImage != null) defaultImage.gameObject.SetActive(!_isHovered && !isChecked);
+        if (hoverImage != null) hoverImage.gameObject.SetActive(_isHovered && !isChecked);
+        if (checkImage != null) checkImage.gameObject.SetActive(isChecked);
     }
 }

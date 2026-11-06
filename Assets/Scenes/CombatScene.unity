@@ -3943,6 +3943,7 @@ MonoBehaviour:
   - {fileID: 1027264907}
   - {fileID: 565661935}
   - {fileID: 2053619003}
+  slashEffectPrefab: {fileID: 4478110506599088458, guid: b9823e4ca6461eb4e8fb06194b5851c2, type: 3}
 --- !u!114 &465670216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3985,14 +3986,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerAttack: {fileID: 0}
   startingWeapons:
-  - {fileID: 11400000, guid: f843dd0dd5f211c46abe4058a199df61, type: 2}
-  - {fileID: 11400000, guid: 4d208130ec09903459eecd77042d4d3b, type: 2}
   - {fileID: 11400000, guid: 7d971615036a35849b0fc816c57c5dc6, type: 2}
   - {fileID: 11400000, guid: 893cd34e38109a542a7c4cd3fd4cec90, type: 2}
   - {fileID: 11400000, guid: f12d0ee4290490f4e9b8836c84d7d05e, type: 2}
   - {fileID: 11400000, guid: 4369e3c6f189f3c4c81536d0da331322, type: 2}
   - {fileID: 11400000, guid: 030bc6af2315a0c4186426d129eb352b, type: 2}
   - {fileID: 11400000, guid: eb71ec8a8c71264418a56691cb84b793, type: 2}
+  startingWeaponQuantity: 0
   capacity: 24
   seedStarterItems: 1
 --- !u!4 &467559467 stripped
@@ -99535,6 +99535,7 @@ MonoBehaviour:
   healthTMP: {fileID: 1634162032}
   manaTMP: {fileID: 491165130}
   expTMP: {fileID: 482663144}
+  goldTMP: {fileID: 0}
 --- !u!1001 &1888287694
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -24,7 +24,7 @@ public sealed class InventoryUI : MonoBehaviour
     private Canvas _canvas;
     private GameObject _dragGhost;
     private int _draggedIndex = -1;
-    private int _hoveredIndex = -1;
+    private int _selectedIndex = -1;
     private bool _isOpen;
 
     public bool IsOpen => _isOpen;
@@ -41,7 +41,7 @@ public sealed class InventoryUI : MonoBehaviour
         if (_inventory != null) _inventory.Changed += Refresh;
         _isOpen = panel != null && panel.activeSelf;
         Refresh();
-        if (infoPanel != null) infoPanel.Hide();
+        ClearSelection();
     }
 
     private void OnDestroy()
@@ -64,8 +64,6 @@ public sealed class InventoryUI : MonoBehaviour
     public void Close()
     {
         _isOpen = false;
-        _hoveredIndex = -1;
-        RefreshHoverInfo();
         if (panel != null) panel.SetActive(false);
     }
 
@@ -100,17 +98,17 @@ public sealed class InventoryUI : MonoBehaviour
         }
     }
 
-    public void HoverSlot(int index)
+    public void SelectSlot(int index)
     {
-        _hoveredIndex = index;
-        RefreshHoverInfo();
-    }
-
-    public void ClearHover(int index)
-    {
-        if (_hoveredIndex != index) return;
-        _hoveredIndex = -1;
-        RefreshHoverInfo();
+        if (_contents == null || index < 0 || index >= _contents.Length) return;
+        if (_contents[index].weapon == null)
+        {
+            ClearSelection();
+            return;
+        }
+        _selectedIndex = index;
+        ApplySelectionVisuals();
+        RefreshSelectedInfo();
     }
 
     public void DropOn(int targetIndex)
@@ -122,10 +120,13 @@ public sealed class InventoryUI : MonoBehaviour
             SlotContent temp = _contents[_draggedIndex];
             _contents[_draggedIndex] = _contents[targetIndex];
             _contents[targetIndex] = temp;
+            if (_selectedIndex == _draggedIndex) _selectedIndex = targetIndex;
+            else if (_selectedIndex == targetIndex) _selectedIndex = _draggedIndex;
         }
         _draggedIndex = -1;
         ApplyContents();
-        RefreshHoverInfo();
+        ApplySelectionVisuals();
+        RefreshSelectedInfo();
     }
 
     public void DropOnEquip()
@@ -152,7 +153,6 @@ public sealed class InventoryUI : MonoBehaviour
         _dragGhost = null;
         _draggedIndex = -1;
         ApplyContents();
-        RefreshHoverInfo();
     }
 
     private void CollectSlots()
@@ -178,7 +178,7 @@ public sealed class InventoryUI : MonoBehaviour
         if (_inventory == null || _slots.Count == 0) return;
         SyncContents();
         ApplyContents();
-        RefreshHoverInfo();
+        RefreshSelectedInfo();
     }
 
     private void SyncContents()
@@ -236,17 +236,31 @@ public sealed class InventoryUI : MonoBehaviour
         }
     }
 
-    private void RefreshHoverInfo()
+    private void RefreshSelectedInfo()
     {
-        Weapon weapon = _contents != null && _hoveredIndex >= 0 && _hoveredIndex < _contents.Length
-            ? _contents[_hoveredIndex].weapon
+        Weapon weapon = _contents != null && _selectedIndex >= 0 && _selectedIndex < _contents.Length
+            ? _contents[_selectedIndex].weapon
             : null;
-        if (infoPanel == null) return;
         if (weapon == null)
         {
-            infoPanel.Hide();
+            ClearSelection();
             return;
         }
-        infoPanel.Show(weapon);
+        if (infoPanel != null) infoPanel.Show(weapon);
+    }
+
+    private void ClearSelection()
+    {
+        _selectedIndex = -1;
+        ApplySelectionVisuals();
+        if (infoPanel != null) infoPanel.Hide();
+    }
+
+    private void ApplySelectionVisuals()
+    {
+        for (int i = 0; i < _slots.Count; i++)
+        {
+            _slots[i].SetSelected(i == _selectedIndex);
+        }
     }
 }

@@ -82,6 +82,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
+  lifetime: 3
+  spriteAngle: 0
 --- !u!1 &8549483532731773923
 GameObject:
   m_ObjectHideFlags: 0

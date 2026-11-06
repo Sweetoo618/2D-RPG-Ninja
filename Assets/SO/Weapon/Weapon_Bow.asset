@@ -15,9 +15,9 @@ MonoBehaviour:
   weaponName: Bow
   description: A sturdy bow that fires sharp arrows.
   icon: {fileID: 21300000, guid: f43beb2b739d7654fadb6f7318b2f60e, type: 3}
-  weaponType: 0
+  weaponType: 1
   damage: 1.5
   criticalChance: 10
   criticalMultiplier: 2
   projectilePrefab: {fileID: 198836619703177403, guid: 225bd0fe1f1206a408342d903c874dc7, type: 3}
-  requiredMana: 1
+  requiredMana: 0

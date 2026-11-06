@@ -9,6 +9,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private Weapon secondaryWeapon;
     [SerializeField] private float meleeRange = 1.5f;
     [SerializeField] private Transform[] attackPositions;
+    [SerializeField] private GameObject slashEffectPrefab;
     
     private PlayerActions _actions;
     private PlayerAnimations _playerAnimations;
@@ -81,29 +82,74 @@ public class PlayerAttack : MonoBehaviour
                 ? player.Stats.MagicDamageBonus
                 : player.Stats.PhysicalDamageBonus;
         }
-        if (_currentWeapon.weaponType == WeaponType.Magic)
+        if (_currentWeapon.weaponType == WeaponType.Melee)
         {
-            if (_currentAttackPosition == null || _currentWeapon.projectilePrefab == null) yield break;
-            if (_playerMana == null || _playerMana.CurrentMana < _currentWeapon.requiredMana) yield break;
-            Projectile projectile = Instantiate(_currentWeapon.projectilePrefab,
-                _currentAttackPosition.position, Quaternion.identity);
-            projectile.Direction = _lastAttackDirection;
-            projectile.Damage = damage;
-            _playerMana.UseMana(_currentWeapon.requiredMana);
+            if (slashEffectPrefab != null)
+            {
+                Instantiate(slashEffectPrefab, _currentAttackPosition.position, Quaternion.identity);
+            }
+            if (CanHitTarget())
+            {
+                IDamageable target = GetTarget();
+                if (target != null) target.TakeDamage(damage, isCritical);
+            }
+        }
+        else if (_currentWeapon.weaponType == WeaponType.Ranged)
+        {
+            if (_currentWeapon.projectilePrefab == null) yield break;
+            FireProjectile(damage);
         }
         else
         {
-            if (_enemyTarget == null) yield break;
-            EnemyHealth targetHealth = _enemyTarget.GetComponent<EnemyHealth>();
-            if (targetHealth == null || targetHealth.CurrentHealth <= 0f) yield break;
-            if (Vector2.Distance(transform.position, _enemyTarget.transform.position) > meleeRange) yield break;
-            targetHealth.TakeDamage(damage, isCritical);
+            if (_currentWeapon.projectilePrefab == null) yield break;
+            if (_playerMana == null || _playerMana.CurrentMana < _currentWeapon.requiredMana) yield break;
+            FireProjectile(damage);
+            _playerMana.UseMana(_currentWeapon.requiredMana);
         }
         AttackPerformed?.Invoke();
         _playerAnimations.SetAttackAnimation(true);
         yield return new WaitForSeconds(0.5f);
         _playerAnimations.SetAttackAnimation(false);
         _attackCoroutine = null;
+    }
+
+    private IDamageable GetTarget()
+    {
+        if (_enemyTarget == null) return null;
+        IDamageable target = _enemyTarget.GetComponent<IDamageable>();
+        if (target == null || target.IsDead) return null;
+        return target;
+    }
+
+    private bool CanHitTarget()
+    {
+        if (GetTarget() == null) return false;
+        if (Vector2.Distance(transform.position, _enemyTarget.transform.position) > meleeRange) return false;
+        Vector2 toTarget = (Vector2)_enemyTarget.transform.position - (Vector2)transform.position;
+        if (toTarget.sqrMagnitude <= 0.0001f) return true;
+        return Vector2.Dot(GetFacingDirection(), toTarget.normalized) > 0.5f;
+    }
+
+    private void FireProjectile(float damage)
+    {
+        Projectile projectile = Instantiate(_currentWeapon.projectilePrefab,
+            _currentAttackPosition.position, Quaternion.identity);
+        projectile.Direction = GetFacingDirection();
+        projectile.Damage = damage;
+    }
+
+    private Vector2 GetFacingDirection()
+    {
+        Vector2 facing = Vector2.zero;
+        if (_currentAttackPosition != null)
+        {
+            facing = (Vector2)_currentAttackPosition.position - (Vector2)transform.position;
+        }
+        if (facing.sqrMagnitude <= 0.0001f) facing = _lastAttackDirection;
+        if (facing.sqrMagnitude <= 0.0001f) return Vector2.down;
+        return Mathf.Abs(facing.x) >= Mathf.Abs(facing.y)
+            ? new Vector2(Mathf.Sign(facing.x), 0f)
+            : new Vector2(0f, Mathf.Sign(facing.y));
     }
 
     private void GetFirePosition()

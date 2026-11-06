@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour, IDamageable
@@ -11,6 +7,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private PlayerAnimations _playerAnimations;
 
+    public bool IsDead => stats == null || stats.Health <= 0f;
+
     private void Awake()
     {
         _playerAnimations = GetComponent<PlayerAnimations>();
@@ -18,7 +16,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private void Update()
     {
-        if (stats != null && stats.Health <= 0f)
+        if (IsDead)
         {
             PlayerDead();
         }
@@ -26,11 +24,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public void TakeDamage(float amount)
     {
-        if (stats == null || stats.Health <= 0f) return;
+        TakeDamage(amount, false);
+    }
+
+    public void TakeDamage(float amount, bool isCritical)
+    {
+        if (stats == null || IsDead) return;
         float reducedAmount = amount * (1f - stats.DamageReduction);
         stats.Health -= reducedAmount;
-        DamageManager.Instance?.ShowDamageText(reducedAmount, transform, false);
-        if (stats.Health <= 0f)
+        DamageManager.Instance?.ShowDamageText(reducedAmount, transform, isCritical);
+        if (IsDead)
         {
             stats.Health = 0f;
             PlayerDead();
@@ -42,6 +45,3 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         _playerAnimations.SetDeadAnimation();
     }
 }
-
-
-

@@ -74,12 +74,12 @@ public sealed class DialogueUI : MonoBehaviour
         _portrait = CreateImage("Portrait", _portraitFrame.transform, null,
             new Vector2(0.08f, 0.08f), new Vector2(0.92f, 0.92f));
 
-        _speaker = CreateText("Speaker", _root.transform, new Vector2(0.26f, 0.68f), new Vector2(0.96f, 0.9f), 28f);
+        _speaker = UIFactory.CreateText("Speaker", _root.transform, new Vector2(0.26f, 0.68f), new Vector2(0.96f, 0.9f), 28f);
         _speaker.color = new Color(0.12f, 0.08f, 0.05f);
-        _body = CreateText("Body", _root.transform, new Vector2(0.26f, 0.22f), new Vector2(0.94f, 0.67f), 24f);
+        _body = UIFactory.CreateText("Body", _root.transform, new Vector2(0.26f, 0.22f), new Vector2(0.94f, 0.67f), 24f);
         _body.color = new Color(0.08f, 0.08f, 0.08f);
         _body.enableWordWrapping = true;
-        _hint = CreateText("Hint", _root.transform, new Vector2(0.7f, 0.04f), new Vector2(0.96f, 0.2f), 16f);
+        _hint = UIFactory.CreateText("Hint", _root.transform, new Vector2(0.7f, 0.04f), new Vector2(0.96f, 0.2f), 16f);
         _hint.alignment = TextAlignmentOptions.Right;
         _hint.color = new Color(0.15f, 0.12f, 0.08f);
         _hint.text = "E / Space  Next";
@@ -100,21 +100,5 @@ public sealed class DialogueUI : MonoBehaviour
         image.preserveAspect = true;
         image.enabled = sprite != null;
         return image;
-    }
-
-    private static TMP_Text CreateText(string name, Transform parent, Vector2 min, Vector2 max, float size)
-    {
-        GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
-        textObject.transform.SetParent(parent, false);
-        RectTransform rect = (RectTransform)textObject.transform;
-        rect.anchorMin = min;
-        rect.anchorMax = max;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        TMP_Text text = textObject.GetComponent<TMP_Text>();
-        text.fontSize = size;
-        text.color = Color.white;
-        text.raycastTarget = false;
-        return text;
     }
 }

@@ -68,7 +68,7 @@ public sealed class ShopManager : MonoBehaviour
     public bool Buy(string itemId)
     {
         if (_player == null || _player.Stats == null || _inventory == null) return false;
-        InventoryItemStack item = PlayerInventory.CreateItem(itemId, 1);
+        InventoryItemStack item = ItemDatabase.Create(itemId, 1);
         if (item == null || !_player.Stats.SpendGold(item.price)) return false;
         if (!_inventory.AddItem(item))
         {
@@ -100,13 +100,13 @@ public sealed class ShopManager : MonoBehaviour
         Image background = _panel.GetComponent<Image>();
         background.color = new Color(0.06f, 0.07f, 0.11f, 0.97f);
 
-        TMP_Text title = CreateText("Title", _panel.transform, new Vector2(0.06f, 0.91f), new Vector2(0.7f, 0.99f), 26f);
+        TMP_Text title = UIFactory.CreateText("Title", _panel.transform, new Vector2(0.06f, 0.91f), new Vector2(0.7f, 0.99f), 26f);
         title.text = "SHOP  [B / Esc]";
         title.color = new Color(1f, 0.8f, 0.42f);
-        _goldText = CreateText("Gold", _panel.transform, new Vector2(0.66f, 0.91f), new Vector2(0.94f, 0.99f), 19f);
+        _goldText = UIFactory.CreateText("Gold", _panel.transform, new Vector2(0.66f, 0.91f), new Vector2(0.94f, 0.99f), 19f);
         _goldText.alignment = TextAlignmentOptions.Right;
         _goldText.color = new Color(1f, 0.8f, 0.42f);
-        _statusText = CreateText("Status", _panel.transform, new Vector2(0.06f, 0.02f), new Vector2(0.94f, 0.09f), 14f);
+        _statusText = UIFactory.CreateText("Status", _panel.transform, new Vector2(0.06f, 0.02f), new Vector2(0.94f, 0.09f), 14f);
         _statusText.alignment = TextAlignmentOptions.Center;
         _statusText.color = Color.white;
 
@@ -116,7 +116,7 @@ public sealed class ShopManager : MonoBehaviour
 
     private void CreateOfferRow(string itemId, int index)
     {
-        InventoryItemStack item = PlayerInventory.CreateItem(itemId);
+        InventoryItemStack item = ItemDatabase.Create(itemId);
         if (item == null) return;
         float top = 0.84f - index * 0.125f;
         GameObject row = new GameObject("Offer_" + itemId, typeof(RectTransform), typeof(Image));
@@ -139,9 +139,9 @@ public sealed class ShopManager : MonoBehaviour
         icon.sprite = item.icon;
         icon.preserveAspect = true;
 
-        TMP_Text name = CreateText("Name", row.transform, new Vector2(0.23f, 0.42f), new Vector2(0.65f, 0.9f), 17f);
+        TMP_Text name = UIFactory.CreateText("Name", row.transform, new Vector2(0.23f, 0.42f), new Vector2(0.65f, 0.9f), 17f);
         name.text = item.displayName;
-        TMP_Text price = CreateText("Price", row.transform, new Vector2(0.23f, 0.08f), new Vector2(0.65f, 0.42f), 14f);
+        TMP_Text price = UIFactory.CreateText("Price", row.transform, new Vector2(0.23f, 0.08f), new Vector2(0.65f, 0.42f), 14f);
         price.text = item.price + " gold";
         price.color = new Color(1f, 0.8f, 0.42f);
         GameObject buttonObject = new GameObject("Buy", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -154,7 +154,7 @@ public sealed class ShopManager : MonoBehaviour
         buttonObject.GetComponent<Image>().color = new Color(0.2f, 0.55f, 0.36f, 1f);
         string offerId = itemId;
         buttonObject.GetComponent<Button>().onClick.AddListener(() => Buy(offerId));
-        TMP_Text buttonText = CreateText("Label", buttonObject.transform, Vector2.zero, Vector2.one, 15f);
+        TMP_Text buttonText = UIFactory.CreateText("Label", buttonObject.transform, Vector2.zero, Vector2.one, 15f);
         buttonText.alignment = TextAlignmentOptions.Center;
         buttonText.text = "BUY";
     }
@@ -163,21 +163,5 @@ public sealed class ShopManager : MonoBehaviour
     {
         if (_player == null || _player.Stats == null || _goldText == null) return;
         _goldText.text = _player.Stats.Gold + " gold";
-    }
-
-    private static TMP_Text CreateText(string name, Transform parent, Vector2 min, Vector2 max, float size)
-    {
-        GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
-        textObject.transform.SetParent(parent, false);
-        RectTransform rect = (RectTransform)textObject.transform;
-        rect.anchorMin = min;
-        rect.anchorMax = max;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        TMP_Text text = textObject.GetComponent<TMP_Text>();
-        text.fontSize = size;
-        text.color = Color.white;
-        text.raycastTarget = false;
-        return text;
     }
 }

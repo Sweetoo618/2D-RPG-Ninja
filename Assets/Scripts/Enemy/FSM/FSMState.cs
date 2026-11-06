@@ -15,9 +15,10 @@ public class FSMState
     
     private void ExecuteActions()
     {
+        if (Actions == null) return;
         for (int i = 0; i < Actions.Length; i++)
         {
-            Actions[i].Act();
+            if (Actions[i] != null) Actions[i].Act();
         }
     }
 

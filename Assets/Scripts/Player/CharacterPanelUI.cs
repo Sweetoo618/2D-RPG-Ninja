@@ -69,12 +69,12 @@ public sealed class CharacterPanelUI : MonoBehaviour
         rect.offsetMax = Vector2.zero;
         UnityEngine.UI.Image background = _panel.GetComponent<UnityEngine.UI.Image>();
         background.color = new Color(0.08f, 0.09f, 0.12f, 0.94f);
-        _statsText = CreateText("Stats", _panel.transform, new Vector2(0.06f, 0.48f), new Vector2(0.94f, 0.94f), 20f);
-        _inventoryText = CreateText("Inventory", _panel.transform, new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.48f), 16f);
+        _statsText = UIFactory.CreateText("Stats", _panel.transform, new Vector2(0.06f, 0.48f), new Vector2(0.94f, 0.94f), 20f);
+        _inventoryText = UIFactory.CreateText("Inventory", _panel.transform, new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.48f), 16f);
         _equipmentIcon = CreateImage("EquipmentSlot", _panel.transform, new Vector2(0.74f, 0.12f), new Vector2(0.92f, 0.30f));
-        _equipmentLabel = CreateText("EquipmentLabel", _panel.transform, new Vector2(0.58f, 0.03f), new Vector2(0.94f, 0.12f), 12f);
+        _equipmentLabel = UIFactory.CreateText("EquipmentLabel", _panel.transform, new Vector2(0.58f, 0.03f), new Vector2(0.94f, 0.12f), 12f);
         _equipmentLabel.alignment = TextAlignmentOptions.Center;
-        _pointText = CreateText("AttributeButtons", _panel.transform, new Vector2(0.06f, 0.43f), new Vector2(0.94f, 0.52f), 16f);
+        _pointText = UIFactory.CreateText("AttributeButtons", _panel.transform, new Vector2(0.06f, 0.43f), new Vector2(0.94f, 0.52f), 16f);
         _pointText.text = "Spend attribute points";
         CreateButton("STR +", _panel.transform, 0.06f, 0.34f, PlayerStats.AttributeType.Strength);
         CreateButton("VIT +", _panel.transform, 0.29f, 0.34f, PlayerStats.AttributeType.Vitality);
@@ -116,22 +116,6 @@ public sealed class CharacterPanelUI : MonoBehaviour
         return result.ToString();
     }
 
-    private static TMP_Text CreateText(string name, Transform parent, Vector2 min, Vector2 max, float fontSize)
-    {
-        GameObject obj = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
-        obj.transform.SetParent(parent, false);
-        RectTransform rect = (RectTransform)obj.transform;
-        rect.anchorMin = min;
-        rect.anchorMax = max;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        TMP_Text text = obj.GetComponent<TMP_Text>();
-        text.fontSize = fontSize;
-        text.color = Color.white;
-        text.raycastTarget = false;
-        return text;
-    }
-
     private static Image CreateImage(string name, Transform parent, Vector2 min, Vector2 max)
     {
         GameObject obj = new GameObject(name, typeof(RectTransform), typeof(Image));
@@ -161,7 +145,7 @@ public sealed class CharacterPanelUI : MonoBehaviour
         {
             if (player != null && player.Stats != null) player.Stats.SpendAttributePoint(attribute);
         });
-        TMP_Text buttonText = CreateText("Label", buttonObject.transform, Vector2.zero, Vector2.one, 14f);
+        TMP_Text buttonText = UIFactory.CreateText("Label", buttonObject.transform, Vector2.zero, Vector2.one, 14f);
         buttonText.alignment = TextAlignmentOptions.Center;
         buttonText.text = label;
     }

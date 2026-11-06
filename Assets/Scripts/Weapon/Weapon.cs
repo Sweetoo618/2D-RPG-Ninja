@@ -4,8 +4,9 @@ using UnityEngine;
 
 public enum WeaponType
 {
-    Magic,
-    Melee
+    Melee,
+    Ranged,
+    Magic
 }
 
 [CreateAssetMenu(fileName = "Weapon_")]

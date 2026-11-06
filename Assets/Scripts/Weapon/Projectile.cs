@@ -8,6 +8,8 @@ public class Projectile : MonoBehaviour
     [Header("Config")]
     [SerializeField] private float speed;
     [SerializeField] private float lifetime = 3f;
+    // 贴图自身朝向：0 为朝右，90 为朝上
+    [SerializeField] private float spriteAngle;
     
     private Vector3 _direction;
 
@@ -19,7 +21,7 @@ public class Projectile : MonoBehaviour
             _direction = value;
             if (_direction.sqrMagnitude > 0.0001f)
             {
-                float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
+                float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg - spriteAngle;
                 transform.rotation = Quaternion.Euler(0f, 0f, angle);
             }
         }

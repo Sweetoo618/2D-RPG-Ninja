@@ -226,7 +226,7 @@ public sealed class PlayerInventory : MonoBehaviour
         for (int i = 0; i < itemIds.Length; i++)
         {
             int quantity = quantities != null && i < quantities.Length ? quantities[i] : 1;
-            InventoryItemStack item = CreateItem(itemIds[i], quantity);
+            InventoryItemStack item = ItemDatabase.Create(itemIds[i], quantity);
             if (item != null) _items.Add(item);
         }
         Changed?.Invoke();
@@ -234,22 +234,8 @@ public sealed class PlayerInventory : MonoBehaviour
 
     private void SeedStarterItems()
     {
-        InventoryItemStack potion = CreateItem("LifePotion", 3);
+        InventoryItemStack potion = ItemDatabase.Create("LifePotion", 3);
         AddItem(potion, potion == null ? 0 : potion.quantity);
-    }
-
-    public static InventoryItemStack CreateItem(string itemId, int amount = 1)
-    {
-        switch (itemId)
-        {
-            case "LifePotion": return new InventoryItemStack(itemId, "Life Potion", ItemIconResolver.Resolve("LifePotion"), amount, 18, 8f, 0f);
-            case "Beaf": return new InventoryItemStack(itemId, "Beaf", ItemIconResolver.Resolve("Beaf"), amount, 12, 5f, 0f);
-            case "Shrimp": return new InventoryItemStack(itemId, "Shrimp", ItemIconResolver.Resolve("Shrimp"), amount, 10, 4f, 0f);
-            case "TeaLeaf": return new InventoryItemStack(itemId, "Tea Leaf", ItemIconResolver.Resolve("TeaLeaf"), amount, 5, 0f, 8f);
-            case "Fish": return new InventoryItemStack(itemId, "Fish", ItemIconResolver.Resolve("Fish"), amount, 10, 6f, 0f);
-            case "Honey": return new InventoryItemStack(itemId, "Honey", ItemIconResolver.Resolve("Honey"), amount, 8, 3f, 3f);
-            default: return null;
-        }
     }
 
     public bool Equip(int index)
