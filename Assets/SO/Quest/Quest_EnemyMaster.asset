@@ -18,15 +18,15 @@ MonoBehaviour:
   description: This is your trial. Slay 30 enemies, and I shall grant you bountiful
     rewards.
   targetKills: 30
-  rewardDescription: '- 50 Exp
+  rewardDescription: '- 100 Exp
 
-    - 50 Gold
+    - 100 Gold
 
-    - 50 Attribute Point'
-  experienceReward: 50
+    - 30 Attribute Point'
+  experienceReward: 100
   healthReward: 0
   manaReward: 0
-  goldReward: 50
-  attributePointReward: 50
+  goldReward: 100
+  attributePointReward: 30
   itemRewards: []
   weaponRewards: []

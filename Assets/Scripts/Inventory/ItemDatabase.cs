@@ -8,6 +8,19 @@ public static class ItemDatabase
 {
     public static InventoryItemStack Create(string itemId, int amount = 1)
     {
+        Consumable[] consumables = Resources.FindObjectsOfTypeAll<Consumable>();
+        for (int i = 0; i < consumables.Length; i++)
+        {
+            Consumable consumable = consumables[i];
+            if (consumable == null || consumable.name != itemId) continue;
+            return new InventoryItemStack(itemId, consumable.itemName, consumable.icon, amount, consumable.price,
+                consumable.restoreHealth, consumable.restoreMana, consumable.restoreExp)
+            {
+                maxStack = consumable.maxStack,
+                description = consumable.description
+            };
+        }
+
         switch (itemId)
         {
             case "LifePotion": return new InventoryItemStack(itemId, "Life Potion", ItemIconResolver.Resolve("LifePotion"), amount, 18, 8f, 0f);

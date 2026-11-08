@@ -28,8 +28,7 @@ public sealed class DialogueUI : MonoBehaviour
         if (manager == null || !DialogueManager.IsOpen) return;
         // 打开对话的那一帧不推进，避免开启用的 E 同时被当成翻页
         if (Time.frameCount == manager.OpenedFrame) return;
-        if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Space))
         {
             manager.Advance();
         }

@@ -19,14 +19,6 @@ public class PlayerMana : MonoBehaviour
         stats.Mana = CurrentMana;
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            UseMana(1f);
-        }
-    }
-    
     public void UseMana(float amount)
     {
         if (stats == null || amount <= 0f) return;

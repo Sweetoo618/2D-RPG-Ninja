@@ -20,13 +20,13 @@ MonoBehaviour:
   targetKills: 10
   rewardDescription: '- 30 Exp
 
-    - 10 Gold
+    - 100 Gold
 
     - 10 Attribute Point'
   experienceReward: 30
   healthReward: 0
   manaReward: 0
-  goldReward: 10
+  goldReward: 100
   attributePointReward: 10
   itemRewards: []
   weaponRewards: []

@@ -13,9 +13,10 @@ public sealed class InventoryItemStack
     public int price;
     public float healthRestore;
     public float manaRestore;
+    public float expRestore;
 
     public InventoryItemStack(string id, string name, Sprite itemIcon, int amount, int itemPrice,
-        float healthAmount, float manaAmount)
+        float healthAmount, float manaAmount, float expAmount = 0f)
     {
         itemId = id;
         displayName = name;
@@ -24,11 +25,12 @@ public sealed class InventoryItemStack
         price = Mathf.Max(0, itemPrice);
         healthRestore = Mathf.Max(0f, healthAmount);
         manaRestore = Mathf.Max(0f, manaAmount);
+        expRestore = Mathf.Max(0f, expAmount);
     }
 
     public InventoryItemStack Clone(int amount)
     {
-        return new InventoryItemStack(itemId, displayName, icon, amount, price, healthRestore, manaRestore)
+        return new InventoryItemStack(itemId, displayName, icon, amount, price, healthRestore, manaRestore, expRestore)
         {
             maxStack = this.maxStack,
             description = this.description

@@ -18,27 +18,18 @@ public abstract class Consumable : ScriptableObject
     [Header("Restore")]
     [Min(0f)] public float restoreHealth;
     [Min(0f)] public float restoreMana;
-    [Range(0f, 1f)] public float restoreHealthPercent;
-    [Range(0f, 1f)] public float restoreManaPercent;
+    [Min(0f)] public float restoreExp;
 
     /// <summary>是否存在任何恢复效果（用于「是否可使用」判断）。</summary>
     public bool HasRestore =>
-        restoreHealth > 0f || restoreMana > 0f ||
-        restoreHealthPercent > 0f || restoreManaPercent > 0f;
+        restoreHealth > 0f || restoreMana > 0f || restoreExp > 0f;
 
-    /// <summary>实际回血量 = 固定值 + 最大生命 × 百分比。</summary>
-    public float GetHealthRestore(float maxHealth) => restoreHealth + maxHealth * restoreHealthPercent;
-
-    /// <summary>实际回蓝量 = 固定值 + 最大法力 × 百分比。</summary>
-    public float GetManaRestore(float maxMana) => restoreMana + maxMana * restoreManaPercent;
-
-    /// <summary>应用效果到目标属性（恢复生命/法力，自动夹紧到上限）。</summary>
-    public void Apply(PlayerStats stats)
+    /// <summary>应用生命、法力和经验恢复效果。</summary>
+    public void Apply(PlayerStats stats, PlayerExp playerExp)
     {
         if (stats == null) return;
-        if (restoreHealth > 0f || restoreHealthPercent > 0f)
-            stats.RestoreHealth(GetHealthRestore(stats.MaxHealth));
-        if (restoreMana > 0f || restoreManaPercent > 0f)
-            stats.RestoreMana(GetManaRestore(stats.MaxMana));
+        stats.RestoreHealth(restoreHealth);
+        stats.RestoreMana(restoreMana);
+        playerExp?.AddExp(restoreExp);
     }
 }

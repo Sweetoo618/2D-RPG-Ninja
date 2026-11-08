@@ -5,14 +5,6 @@ public class PlayerExp : MonoBehaviour
     [Header("Config")]
     [SerializeField] private PlayerStats stats;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            AddExp(300f);
-        }
-    }
-    
     public void AddExp(float amount)
     {
         if (stats == null || amount <= 0f) return;

@@ -15,9 +15,8 @@ MonoBehaviour:
   itemName: LifePot
   description: LifePot
   icon: {fileID: 21300000, guid: fbf0fefb3d88eb5499a97a09f5bce8d7, type: 3}
-  price: 10
-  maxStack: 10
-  restoreHealth: 10
+  price: 50
+  maxStack: 1
+  restoreHealth: 50
   restoreMana: 10
-  restoreHealthPercent: 0
-  restoreManaPercent: 0
+  restoreExp: 10

@@ -3122,7 +3122,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 401481656}
-  - component: {fileID: 401481657}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -3145,19 +3144,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 80058805}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &401481657
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 401481655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a483788560954d1c8c72016868683f18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 465670211}
 --- !u!4 &402991953 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1864104323276182832, guid: 6724a95999dbdbc45a1b9c0ae7e9f7d2, type: 3}
@@ -3682,7 +3668,6 @@ GameObject:
   - component: {fileID: 465670215}
   - component: {fileID: 465670218}
   - component: {fileID: 465670217}
-  - component: {fileID: 465670216}
   m_Layer: 7
   m_Name: Player_Ninja
   m_TagString: Untagged
@@ -3944,18 +3929,6 @@ MonoBehaviour:
   - {fileID: 565661935}
   - {fileID: 2053619003}
   slashEffectPrefab: {fileID: 4478110506599088458, guid: b9823e4ca6461eb4e8fb06194b5851c2, type: 3}
---- !u!114 &465670216
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 465670203}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9134e84f3584a24e86d96064a107084, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &465670217
 MonoBehaviour:
   m_ObjectHideFlags: 0

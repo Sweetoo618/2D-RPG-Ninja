@@ -15,9 +15,8 @@ MonoBehaviour:
   itemName: EmptyPot
   description: EmptyPot
   icon: {fileID: 21300000, guid: 92c452ecc42baf042902b91859213035, type: 3}
-  price: 10
-  maxStack: 10
-  restoreHealth: 10
-  restoreMana: 10
-  restoreHealthPercent: 0
-  restoreManaPercent: 0
+  price: 1
+  maxStack: 1
+  restoreHealth: 0
+  restoreMana: 0
+  restoreExp: 0

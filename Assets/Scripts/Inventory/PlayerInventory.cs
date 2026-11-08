@@ -17,6 +17,7 @@ public sealed class PlayerInventory : MonoBehaviour
     private readonly List<InventoryItemStack> _items = new List<InventoryItemStack>();
     private int _equippedIndex;
     private Player _player;
+    private PlayerExp _playerExp;
 
     public IReadOnlyList<Weapon> Weapons => _weapons;
     public IReadOnlyList<InventoryItemStack> Items => _items;
@@ -88,6 +89,7 @@ public sealed class PlayerInventory : MonoBehaviour
     {
         if (playerAttack == null) playerAttack = GetComponent<PlayerAttack>();
         _player = GetComponent<Player>();
+        _playerExp = GetComponent<PlayerExp>();
     }
 
     private void Start()
@@ -164,7 +166,7 @@ public sealed class PlayerInventory : MonoBehaviour
     }
 
     public bool AddItem(string itemId, string displayName, Sprite icon, int amount, int price,
-        float healthRestore, float manaRestore)
+        float healthRestore, float manaRestore, float expRestore = 0f)
     {
         if (string.IsNullOrWhiteSpace(itemId) || amount <= 0) return false;
         InventoryItemStack existing = _items.Find(item => item.itemId == itemId);
@@ -174,8 +176,8 @@ public sealed class PlayerInventory : MonoBehaviour
             Changed?.Invoke();
             return true;
         }
-        if (_items.Count >= capacity) return false;
-        _items.Add(new InventoryItemStack(itemId, displayName, icon, amount, price, healthRestore, manaRestore));
+        if (_items.Count + _weapons.Count >= capacity) return false;
+        _items.Add(new InventoryItemStack(itemId, displayName, icon, amount, price, healthRestore, manaRestore, expRestore));
         Changed?.Invoke();
         return true;
     }
@@ -184,19 +186,35 @@ public sealed class PlayerInventory : MonoBehaviour
     {
         if (item == null) return false;
         return AddItem(item.itemId, item.displayName, item.icon, amount, item.price,
-            item.healthRestore, item.manaRestore);
+            item.healthRestore, item.manaRestore, item.expRestore);
     }
 
     /// <summary>把消耗品加入背包，按 maxStack 正确拆分多堆。</summary>
     public bool AddConsumable(Consumable consumable, int amount)
     {
-        if (consumable == null || amount <= 0) return false;
+        if (!CanAddConsumable(consumable, amount)) return false;
         return AddItemCore(consumable.name, consumable.itemName, consumable.description, consumable.icon, amount,
-            consumable.price, consumable.restoreHealth, consumable.restoreMana, consumable.maxStack);
+            consumable.price, consumable.restoreHealth, consumable.restoreMana, consumable.restoreExp, consumable.maxStack);
+    }
+
+    public bool CanAddConsumable(Consumable consumable, int amount)
+    {
+        if (consumable == null || amount <= 0 || consumable.maxStack <= 0) return false;
+
+        int remaining = amount;
+        for (int i = 0; i < _items.Count && remaining > 0; i++)
+        {
+            InventoryItemStack stack = _items[i];
+            if (stack == null || stack.itemId != consumable.name) continue;
+            remaining -= Mathf.Min(Mathf.Max(0, stack.maxStack - stack.quantity), remaining);
+        }
+
+        int requiredSlots = Mathf.CeilToInt(remaining / (float)consumable.maxStack);
+        return _items.Count + _weapons.Count + requiredSlots <= capacity;
     }
 
     private bool AddItemCore(string itemId, string displayName, string description, Sprite icon, int amount, int price,
-        float healthRestore, float manaRestore, int maxStack)
+        float healthRestore, float manaRestore, float expRestore, int maxStack)
     {
         if (string.IsNullOrWhiteSpace(itemId) || amount <= 0 || maxStack <= 0) return false;
         int remaining = amount;
@@ -214,9 +232,9 @@ public sealed class PlayerInventory : MonoBehaviour
 
         while (remaining > 0)
         {
-            if (_items.Count >= capacity) break;
+            if (_items.Count + _weapons.Count >= capacity) break;
             int add = Mathf.Min(remaining, maxStack);
-            _items.Add(new InventoryItemStack(itemId, displayName, icon, add, price, healthRestore, manaRestore)
+            _items.Add(new InventoryItemStack(itemId, displayName, icon, add, price, healthRestore, manaRestore, expRestore)
             {
                 maxStack = maxStack,
                 description = description
@@ -250,9 +268,11 @@ public sealed class PlayerInventory : MonoBehaviour
     {
         if (index < 0 || index >= _items.Count || _player == null || _player.Stats == null) return false;
         InventoryItemStack item = _items[index];
-        if (item.healthRestore <= 0f && item.manaRestore <= 0f) return false;
+        if (item.expRestore > 0f && _playerExp == null) return false;
+        if (item.healthRestore <= 0f && item.manaRestore <= 0f && item.expRestore <= 0f) return false;
         _player.Stats.RestoreHealth(item.healthRestore);
         _player.Stats.RestoreMana(item.manaRestore);
+        _playerExp?.AddExp(item.expRestore);
         return RemoveItem(index);
     }
 

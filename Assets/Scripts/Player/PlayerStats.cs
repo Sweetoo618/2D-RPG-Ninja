@@ -56,7 +56,7 @@ public class PlayerStats : ScriptableObject
         Vitality = 0;
         Intelligence = 0;
         Defense = 0;
-        Gold = 1000;
+        Gold = 100;
     }
 
     public void EnsureDefaults()
@@ -76,7 +76,9 @@ public class PlayerStats : ScriptableObject
         AttributePoints--;
         switch (attribute)
         {
-            case AttributeType.Strength: Strength++; break;
+            case AttributeType.Strength: 
+                Strength++; 
+                break;
             case AttributeType.Vitality:
                 Vitality++;
                 MaxHealth += 2f;
@@ -87,7 +89,9 @@ public class PlayerStats : ScriptableObject
                 MaxMana += 3f;
                 Mana += 3f;
                 break;
-            case AttributeType.Defense: Defense++; break;
+            case AttributeType.Defense: 
+                Defense++; 
+                break;
         }
         return true;
     }

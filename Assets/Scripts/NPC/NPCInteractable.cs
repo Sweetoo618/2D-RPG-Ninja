@@ -5,8 +5,11 @@ using UnityEngine.UI;
 /// NPC 交互：玩家靠近时在头顶显示互动 UI（NPC-Interact 预制体），离开即销毁；按 E 收起 UI。
 /// 对话面板后续接入。
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public sealed class NPCInteractable : MonoBehaviour
 {
+    private static int _lastInteractionFrame = -1;
+
     [Header("Interaction")]
     [Tooltip("NPC 对话数据（留空则自动获取同物体上的 NPCDialogue）")]
     [SerializeField] private NPCDialogue dialogue;
@@ -24,6 +27,8 @@ public sealed class NPCInteractable : MonoBehaviour
     private Camera _camera;
     private RectTransform _prompt;
     private bool _dismissed;
+
+    public static bool InteractionStartedThisFrame => _lastInteractionFrame == Time.frameCount;
 
     private void Awake()
     {
@@ -65,6 +70,7 @@ public sealed class NPCInteractable : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
+            _lastInteractionFrame = Time.frameCount;
             _dismissed = true;
             DestroyPrompt();
             DialogueManager.Instance.Begin(dialogue);

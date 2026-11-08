@@ -15,7 +15,7 @@ MonoBehaviour:
   questId: EnemyHunter
   title: EnemyHunter
   image: {fileID: 21300000, guid: 4521359cb9c97184d8b5666e2e59ad0d, type: 3}
-  description: This is your trial. Slay 10 enemies, and I shall grant you bountiful
+  description: This is your trial. Slay 50 enemies, and I shall grant you bountiful
     rewards.
   targetKills: 50
   rewardDescription: '- 80 Exp
