@@ -1,66 +1,129 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class QuestManager : MonoBehaviour
 {
-    [SerializeField] private QuestDefinition activeQuest;
-    public int Progress { get; private set; }
-    public bool IsAccepted { get; private set; }
-    public bool IsComplete => IsAccepted && activeQuest != null && Progress >= activeQuest.targetKills;
-    public bool IsRewardClaimed { get; private set; }
-    public QuestDefinition ActiveQuest => activeQuest;
+    [Tooltip("读档恢复时用于还原进行中任务的默认任务（旧存档不保存任务 id）")]
+    [SerializeField] private QuestDefinition defaultQuest;
+
+    private readonly List<QuestRecord> _records = new List<QuestRecord>();
+
     public event Action Changed;
 
-    public void StartQuest(QuestDefinition quest)
+    /// <summary>当前进行中（未领奖）的任务，无则为 null。</summary>
+    public QuestRecord ActiveQuest { get; private set; }
+
+    public int Progress => ActiveQuest == null ? 0 : ActiveQuest.progress;
+
+    public bool HasActiveQuest => ActiveQuest != null;
+
+    public bool IsComplete => ActiveQuest != null && ActiveQuest.IsComplete;
+
+    /// <summary>已完成（已领奖）的任务，按接取顺序。</summary>
+    public IReadOnlyList<QuestRecord> CompletedQuests
     {
-        if (quest == null) return;
-        activeQuest = quest;
-        Progress = 0;
-        IsAccepted = true;
-        IsRewardClaimed = false;
-        Changed?.Invoke();
+        get
+        {
+            List<QuestRecord> list = new List<QuestRecord>();
+            for (int i = 0; i < _records.Count; i++)
+                if (_records[i].claimed) list.Add(_records[i]);
+            return list;
+        }
     }
 
-    public bool TryAccept(QuestDefinition quest)
+    public bool TryAccept(QuestDefinition definition)
     {
-        if (quest == null || IsAccepted && activeQuest != quest) return false;
-        if (IsAccepted) return true;
-        StartQuest(quest);
+        if (definition == null || HasActiveQuest) return false;
+
+        QuestRecord record = new QuestRecord();
+        record.quest = definition;
+        record.progress = 0;
+        record.claimed = false;
+
+        ActiveQuest = record;
+        _records.Add(record);
+        Changed?.Invoke();
         return true;
+    }
+
+    public void Abandon()
+    {
+        if (ActiveQuest == null) return;
+
+        _records.Remove(ActiveQuest);
+        ActiveQuest = null;
+        Changed?.Invoke();
     }
 
     public bool ClaimReward()
     {
-        if (!IsComplete || IsRewardClaimed || activeQuest == null) return false;
-        FindObjectOfType<PlayerExp>()?.AddExp(activeQuest.experienceReward);
-        IsRewardClaimed = true;
+        if (ActiveQuest == null || !ActiveQuest.IsComplete || ActiveQuest.claimed) return false;
+
+        QuestDefinition quest = ActiveQuest.quest;
+
+        Player player = FindObjectOfType<Player>();
+        if (player != null && player.Stats != null) ApplyStatRewards(quest, player.Stats);
+
+        PlayerInventory inventory = FindObjectOfType<PlayerInventory>();
+        if (inventory != null) ApplyInventoryRewards(quest, inventory);
+
+        FindObjectOfType<PlayerExp>()?.AddExp(quest.experienceReward);
+
+        ActiveQuest.claimed = true;
+        ActiveQuest = null;
         Changed?.Invoke();
         return true;
     }
 
-    public void RestoreState(int progress, bool accepted, bool rewardClaimed)
-    {
-        IsAccepted = accepted && activeQuest != null;
-        IsRewardClaimed = rewardClaimed;
-        Progress = activeQuest == null ? 0 : Mathf.Clamp(progress, 0, activeQuest.targetKills);
-        Changed?.Invoke();
-    }
-
     public void RegisterKill()
     {
-        if (!IsAccepted || activeQuest == null || IsComplete) return;
-        Progress++;
+        if (ActiveQuest == null || ActiveQuest.IsComplete) return;
+        ActiveQuest.progress++;
         Changed?.Invoke();
     }
 
-    public void RestoreProgress(int progress)
+    public void RestoreState(int progress, bool accepted, bool rewardClaimed)
     {
-        IsAccepted = activeQuest != null && progress >= 0;
-        IsRewardClaimed = false;
-        Progress = activeQuest == null ? 0 : Mathf.Clamp(progress, 0, activeQuest.targetKills);
+        _records.Clear();
+        ActiveQuest = null;
+
+        if (accepted && defaultQuest != null)
+        {
+            QuestRecord record = new QuestRecord();
+            record.quest = defaultQuest;
+            record.progress = Mathf.Clamp(progress, 0, defaultQuest.targetKills);
+            record.claimed = rewardClaimed;
+            _records.Add(record);
+            if (!rewardClaimed) ActiveQuest = record;
+        }
+
         Changed?.Invoke();
     }
 
-    public string CurrentQuestText => activeQuest == null || !IsAccepted ? "No active quest" :
-        IsRewardClaimed ? $"{activeQuest.title}: Reward claimed" : $"{activeQuest.title}: {Progress}/{activeQuest.targetKills}";
+    private void ApplyStatRewards(QuestDefinition quest, PlayerStats stats)
+    {
+        stats.RestoreHealth(quest.healthReward);
+        stats.RestoreMana(quest.manaReward);
+        stats.AddGold(quest.goldReward);
+        stats.AttributePoints += quest.attributePointReward;
+    }
+
+    private void ApplyInventoryRewards(QuestDefinition quest, PlayerInventory inventory)
+    {
+        if (quest.itemRewards != null)
+        {
+            for (int i = 0; i < quest.itemRewards.Length; i++)
+            {
+                QuestItemReward reward = quest.itemRewards[i];
+                inventory.AddConsumable(reward.item, reward.amount);
+            }
+        }
+
+        if (quest.weaponRewards != null)
+        {
+            for (int i = 0; i < quest.weaponRewards.Length; i++)
+                inventory.AddWeapon(quest.weaponRewards[i]);
+        }
+    }
 }

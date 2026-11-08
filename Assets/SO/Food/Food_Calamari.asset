@@ -16,7 +16,7 @@ MonoBehaviour:
   description: Calamari
   icon: {fileID: 21300000, guid: 987d8d597c638b443ba212fd0ee93011, type: 3}
   price: 1
-  maxStack: 1
+  maxStack: 10
   restoreHealth: 1
   restoreMana: 1
   restoreHealthPercent: 0

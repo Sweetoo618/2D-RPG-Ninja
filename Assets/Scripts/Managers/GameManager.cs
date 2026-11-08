@@ -8,7 +8,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         if (player == null) player = FindObjectOfType<Player>();
-        if (GetComponent<ShopManager>() == null) gameObject.AddComponent<ShopManager>();
     }
 
     private void Update()

@@ -6,6 +6,8 @@ public sealed class PlayerInventory : MonoBehaviour
 {
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private Weapon[] startingWeapons = new Weapon[4];
+    [SerializeField] private Consumable[] startingConsumables;
+    [SerializeField] private int startingConsumableQuantity = 3;
     [SerializeField] private int startingWeaponQuantity;
     [SerializeField] private int capacity = 24;
     [SerializeField] private bool seedStarterItems = true;
@@ -105,8 +107,8 @@ public sealed class PlayerInventory : MonoBehaviour
             AddWeapon(playerAttack.SecondaryWeapon);
         }
 
-        if (seedStarterItems && !_items.Exists(item => item != null && item.itemId == "LifePotion"))
-            SeedStarterItems();
+        if (seedStarterItems && _items.Count == 0)
+            SeedStartingConsumables();
     }
 
     public bool EquipWeapon(Weapon weapon)
@@ -185,6 +187,47 @@ public sealed class PlayerInventory : MonoBehaviour
             item.healthRestore, item.manaRestore);
     }
 
+    /// <summary>把消耗品加入背包，按 maxStack 正确拆分多堆。</summary>
+    public bool AddConsumable(Consumable consumable, int amount)
+    {
+        if (consumable == null || amount <= 0) return false;
+        return AddItemCore(consumable.name, consumable.itemName, consumable.description, consumable.icon, amount,
+            consumable.price, consumable.restoreHealth, consumable.restoreMana, consumable.maxStack);
+    }
+
+    private bool AddItemCore(string itemId, string displayName, string description, Sprite icon, int amount, int price,
+        float healthRestore, float manaRestore, int maxStack)
+    {
+        if (string.IsNullOrWhiteSpace(itemId) || amount <= 0 || maxStack <= 0) return false;
+        int remaining = amount;
+
+        for (int i = 0; i < _items.Count && remaining > 0; i++)
+        {
+            InventoryItemStack stack = _items[i];
+            if (stack == null || stack.itemId != itemId) continue;
+            int free = stack.maxStack - stack.quantity;
+            if (free <= 0) continue;
+            int add = Mathf.Min(free, remaining);
+            stack.quantity += add;
+            remaining -= add;
+        }
+
+        while (remaining > 0)
+        {
+            if (_items.Count >= capacity) break;
+            int add = Mathf.Min(remaining, maxStack);
+            _items.Add(new InventoryItemStack(itemId, displayName, icon, add, price, healthRestore, manaRestore)
+            {
+                maxStack = maxStack,
+                description = description
+            });
+            remaining -= add;
+        }
+
+        Changed?.Invoke();
+        return remaining == 0;
+    }
+
     public bool RemoveItem(int index, int amount = 1)
     {
         if (index < 0 || index >= _items.Count || amount <= 0) return false;
@@ -193,6 +236,14 @@ public sealed class PlayerInventory : MonoBehaviour
         if (item.quantity <= 0) _items.RemoveAt(index);
         Changed?.Invoke();
         return true;
+    }
+
+    /// <summary>移除整堆消耗品（拖拽到 Remove 区域时丢弃一整格）。</summary>
+    public bool RemoveItemStack(InventoryItemStack item)
+    {
+        if (item == null) return false;
+        int index = _items.IndexOf(item);
+        return index >= 0 && RemoveItem(index, _items[index].quantity);
     }
 
     public bool UseItem(int index)
@@ -232,10 +283,12 @@ public sealed class PlayerInventory : MonoBehaviour
         Changed?.Invoke();
     }
 
-    private void SeedStarterItems()
+    private void SeedStartingConsumables()
     {
-        InventoryItemStack potion = ItemDatabase.Create("LifePotion", 3);
-        AddItem(potion, potion == null ? 0 : potion.quantity);
+        if (startingConsumables == null) return;
+        int quantity = Mathf.Max(1, startingConsumableQuantity);
+        for (int i = 0; i < startingConsumables.Length; i++)
+            AddConsumable(startingConsumables[i], quantity);
     }
 
     public bool Equip(int index)

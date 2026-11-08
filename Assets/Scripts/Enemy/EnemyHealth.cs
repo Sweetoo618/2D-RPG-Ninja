@@ -63,6 +63,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             playerExp?.AddExp(experienceReward);
             FindObjectOfType<QuestManager>()?.RegisterKill();
             SpawnDrop();
+            SpawnLootShadow();
             GetComponentInParent<EnemyRespawner>()?.NotifyEnemyDefeated();
             StartCoroutine(DisableAfterDeath());
         }
@@ -75,6 +76,16 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         SpriteRenderer sourceRenderer = GetComponent<SpriteRenderer>();
         dropObject.GetComponent<EnemyDrop>().Initialize(dropExperience, dropHealthRestore, goldReward,
             sourceRenderer == null ? null : sourceRenderer.sprite);
+    }
+
+    private void SpawnLootShadow()
+    {
+        GameObject shadowObject = new GameObject("LootShadow", typeof(LootShadow));
+        shadowObject.transform.position = transform.position;
+        SpriteRenderer sourceRenderer = GetComponent<SpriteRenderer>();
+        shadowObject.GetComponent<LootShadow>().Initialize(
+            sourceRenderer == null ? 0 : sourceRenderer.sortingLayerID,
+            sourceRenderer == null ? 0 : sourceRenderer.sortingOrder);
     }
 
     private System.Collections.IEnumerator DisableAfterDeath()

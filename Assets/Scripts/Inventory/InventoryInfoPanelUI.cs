@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>Shows the selected inventory weapon's icon, name and description.</summary>
+/// <summary>Shows the selected inventory item's (weapon / consumable) icon, name and description.</summary>
 public sealed class InventoryInfoPanelUI : MonoBehaviour
 {
     [SerializeField] private Image itemImage;
@@ -15,18 +15,33 @@ public sealed class InventoryInfoPanelUI : MonoBehaviour
             Hide();
             return;
         }
-        gameObject.SetActive(true);
-        if (itemImage != null)
+        Apply(weapon.icon, weapon.weaponName, weapon.description);
+    }
+
+    public void Show(InventoryItemStack item)
+    {
+        if (item == null)
         {
-            itemImage.sprite = weapon.icon;
-            itemImage.enabled = weapon.icon != null;
+            Hide();
+            return;
         }
-        if (titleText != null) titleText.text = weapon.weaponName;
-        if (descriptionText != null) descriptionText.text = weapon.description;
+        Apply(item.icon, item.displayName, item.description);
     }
 
     public void Hide()
     {
         gameObject.SetActive(false);
+    }
+
+    private void Apply(Sprite icon, string title, string description)
+    {
+        gameObject.SetActive(true);
+        if (itemImage != null)
+        {
+            itemImage.sprite = icon;
+            itemImage.enabled = icon != null;
+        }
+        if (titleText != null) titleText.text = title;
+        if (descriptionText != null) descriptionText.text = description;
     }
 }

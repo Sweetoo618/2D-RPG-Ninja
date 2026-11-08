@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26def94f7c0d48644a1e02aadee561db, type: 3}
+  m_Name: Quest_EnemyDestoryer
+  m_EditorClassIdentifier: 
+  questId: EnemyDestoryer
+  title: EnemyDestoryer
+  image: {fileID: 21300000, guid: 4521359cb9c97184d8b5666e2e59ad0d, type: 3}
+  description: This is your trial. Slay 20 enemies, and I shall grant you bountiful
+    rewards.
+  targetKills: 20
+  rewardDescription: '- 40 Exp
+
+    - 20 Gold
+
+    - 20 Attribute Point'
+  experienceReward: 40
+  healthReward: 0
+  manaReward: 0
+  goldReward: 20
+  attributePointReward: 20
+  itemRewards: []
+  weaponRewards: []

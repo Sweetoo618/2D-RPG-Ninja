@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,12 +15,11 @@ public sealed class InventoryUI : MonoBehaviour
         public Sprite icon;
         public int quantity;
         public Weapon weapon;
+        public InventoryItemStack item;
     }
 
     private readonly List<InventorySlotUI> _slots = new List<InventorySlotUI>();
     private PlayerInventory _inventory;
-    private ShopManager _shop;
-    private CharacterPanelUI _characterPanel;
     private SlotContent[] _contents;
     private Canvas _canvas;
     private GameObject _dragGhost;
@@ -32,8 +32,6 @@ public sealed class InventoryUI : MonoBehaviour
     private void Awake()
     {
         _inventory = FindObjectOfType<PlayerInventory>();
-        _shop = FindObjectOfType<ShopManager>();
-        _characterPanel = FindObjectOfType<CharacterPanelUI>();
         _canvas = GetComponent<Canvas>();
         if (_canvas == null) _canvas = GetComponentInParent<Canvas>();
         if (panel == null) panel = transform.Find("Inventory-Panel")?.gameObject;
@@ -52,10 +50,6 @@ public sealed class InventoryUI : MonoBehaviour
     public void Open()
     {
         if (panel == null) return;
-        if (_shop == null) _shop = FindObjectOfType<ShopManager>();
-        if (_characterPanel == null) _characterPanel = FindObjectOfType<CharacterPanelUI>();
-        if (_shop != null && _shop.IsOpen) return;
-        _characterPanel?.Close();
         _isOpen = true;
         panel.SetActive(true);
         Refresh();
@@ -101,7 +95,7 @@ public sealed class InventoryUI : MonoBehaviour
     public void SelectSlot(int index)
     {
         if (_contents == null || index < 0 || index >= _contents.Length) return;
-        if (_contents[index].weapon == null)
+        if (_contents[index].weapon == null && _contents[index].item == null)
         {
             ClearSelection();
             return;
@@ -142,8 +136,11 @@ public sealed class InventoryUI : MonoBehaviour
     {
         if (_inventory == null || _contents == null) return;
         if (_draggedIndex < 0 || _draggedIndex >= _contents.Length) return;
-        Weapon weapon = _contents[_draggedIndex].weapon;
-        if (weapon != null) _inventory.RemoveWeapon(weapon);
+
+        SlotContent content = _contents[_draggedIndex];
+        if (content.weapon != null) _inventory.RemoveWeapon(content.weapon);
+        else if (content.item != null) _inventory.RemoveItemStack(content.item);
+
         _draggedIndex = -1;
     }
 
@@ -191,7 +188,9 @@ public sealed class InventoryUI : MonoBehaviour
         for (int i = 0; i < _contents.Length; i++)
         {
             Weapon weapon = _contents[i].weapon;
+            InventoryItemStack item = _contents[i].item;
             if (weapon != null && !_inventory.HasWeapon(weapon)) _contents[i] = default;
+            else if (weapon == null && item != null && !_inventory.Items.Contains(item)) _contents[i] = default;
         }
 
         IReadOnlyList<Weapon> weapons = _inventory.Weapons;
@@ -201,15 +200,31 @@ public sealed class InventoryUI : MonoBehaviour
             if (weapon == null || ContainsWeapon(weapon)) continue;
             int slot = FindEmptySlot();
             if (slot < 0) break;
-            _contents[slot] = new SlotContent { icon = weapon.icon, weapon = weapon };
+            _contents[slot].weapon = weapon;
+        }
+
+        IReadOnlyList<InventoryItemStack> items = _inventory.Items;
+        for (int i = 0; i < items.Count; i++)
+        {
+            InventoryItemStack item = items[i];
+            if (item == null || ContainsItem(item)) continue;
+            int slot = FindEmptySlot();
+            if (slot < 0) break;
+            _contents[slot].item = item;
         }
 
         for (int i = 0; i < _contents.Length; i++)
         {
-            Weapon weapon = _contents[i].weapon;
-            if (weapon == null) continue;
-            _contents[i].icon = weapon.icon;
-            _contents[i].quantity = _inventory.GetWeaponQuantity(weapon);
+            if (_contents[i].weapon != null)
+            {
+                _contents[i].icon = _contents[i].weapon.icon;
+                _contents[i].quantity = _inventory.GetWeaponQuantity(_contents[i].weapon);
+            }
+            else if (_contents[i].item != null)
+            {
+                _contents[i].icon = _contents[i].item.icon;
+                _contents[i].quantity = _contents[i].item.quantity;
+            }
         }
     }
 
@@ -220,10 +235,17 @@ public sealed class InventoryUI : MonoBehaviour
         return false;
     }
 
+    private bool ContainsItem(InventoryItemStack item)
+    {
+        for (int i = 0; i < _contents.Length; i++)
+            if (_contents[i].item == item) return true;
+        return false;
+    }
+
     private int FindEmptySlot()
     {
         for (int i = 0; i < _contents.Length; i++)
-            if (_contents[i].weapon == null) return i;
+            if (_contents[i].weapon == null && _contents[i].item == null) return i;
         return -1;
     }
 
@@ -238,15 +260,27 @@ public sealed class InventoryUI : MonoBehaviour
 
     private void RefreshSelectedInfo()
     {
-        Weapon weapon = _contents != null && _selectedIndex >= 0 && _selectedIndex < _contents.Length
-            ? _contents[_selectedIndex].weapon
-            : null;
-        if (weapon == null)
+        if (_contents == null || _selectedIndex < 0 || _selectedIndex >= _contents.Length)
         {
             ClearSelection();
             return;
         }
-        if (infoPanel != null) infoPanel.Show(weapon);
+
+        Weapon weapon = _contents[_selectedIndex].weapon;
+        if (weapon != null)
+        {
+            if (infoPanel != null) infoPanel.Show(weapon);
+            return;
+        }
+
+        InventoryItemStack item = _contents[_selectedIndex].item;
+        if (item != null)
+        {
+            if (infoPanel != null) infoPanel.Show(item);
+            return;
+        }
+
+        ClearSelection();
     }
 
     private void ClearSelection()

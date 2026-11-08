@@ -22,6 +22,7 @@ public sealed class DialogueManager : MonoBehaviour
 
     public NPCDialogue ActiveDialogue => _activeDialogue;
     public int CurrentLineIndex => _lineIndex;
+    public int OpenedFrame { get; private set; } = -1;
 
     private void Awake()
     {
@@ -51,16 +52,20 @@ public sealed class DialogueManager : MonoBehaviour
         if (dialogue == null || !dialogue.HasDialogue || dialogueUI == null) return;
         _activeDialogue = dialogue;
         _lineIndex = 0;
+        OpenedFrame = Time.frameCount;
         dialogueUI.ShowLine(_activeDialogue, _lineIndex);
     }
 
     public void Advance()
     {
         if (!IsOpen) return;
+
         _lineIndex++;
-        if (_lineIndex >= _activeDialogue.Lines.Length)
+        if (_lineIndex >= _activeDialogue.lines.Length)
         {
+            NPCDialogue finished = _activeDialogue;
             End();
+            if (finished.questPanel != null) finished.questPanel.SetActive(true);
             return;
         }
 
@@ -71,6 +76,7 @@ public sealed class DialogueManager : MonoBehaviour
     {
         _activeDialogue = null;
         _lineIndex = 0;
+        OpenedFrame = -1;
         if (dialogueUI != null) dialogueUI.Hide();
     }
 }

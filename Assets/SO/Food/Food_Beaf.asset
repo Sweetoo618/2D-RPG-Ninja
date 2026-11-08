@@ -16,7 +16,7 @@ MonoBehaviour:
   description: Beaf
   icon: {fileID: 21300000, guid: 4f90205e269a947448b74bdd6d390a73, type: 3}
   price: 1
-  maxStack: 1
+  maxStack: 10
   restoreHealth: 1
   restoreMana: 1
   restoreHealthPercent: 0

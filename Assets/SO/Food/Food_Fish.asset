@@ -15,9 +15,9 @@ MonoBehaviour:
   itemName: Fish
   description: Fish
   icon: {fileID: 21300000, guid: 504540b90f22653468071e36bb2658ea, type: 3}
-  price: 0
-  maxStack: 99
-  restoreHealth: 0
-  restoreMana: 0
+  price: 1
+  maxStack: 10
+  restoreHealth: 1
+  restoreMana: 1
   restoreHealthPercent: 0
   restoreManaPercent: 0

@@ -16,7 +16,7 @@ MonoBehaviour:
   description: Honey
   icon: {fileID: 21300000, guid: 76cf61f55054c554b8e291752713bb31, type: 3}
   price: 1
-  maxStack: 1
+  maxStack: 10
   restoreHealth: 1
   restoreMana: 1
   restoreHealthPercent: 0

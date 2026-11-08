@@ -6,6 +6,7 @@ public sealed class InventoryItemStack
 {
     public string itemId;
     public string displayName;
+    public string description;
     public Sprite icon;
     public int quantity;
     public int maxStack = 99;
@@ -29,7 +30,8 @@ public sealed class InventoryItemStack
     {
         return new InventoryItemStack(itemId, displayName, icon, amount, price, healthRestore, manaRestore)
         {
-            maxStack = this.maxStack
+            maxStack = this.maxStack,
+            description = this.description
         };
     }
 }
