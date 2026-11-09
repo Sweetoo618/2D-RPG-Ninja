@@ -20,6 +20,20 @@ public sealed class QuestManager : MonoBehaviour
 
     public bool IsComplete => ActiveQuest != null && ActiveQuest.IsComplete;
 
+    public string ActiveQuestId => ActiveQuest != null && ActiveQuest.quest != null ? ActiveQuest.quest.name : string.Empty;
+
+    public string[] CompletedQuestIds
+    {
+        get
+        {
+            List<string> ids = new List<string>();
+            for (int i = 0; i < _records.Count; i++)
+                if (_records[i].claimed && _records[i].quest != null)
+                    ids.Add(_records[i].quest.name);
+            return ids.ToArray();
+        }
+    }
+
     /// <summary>已完成（已领奖）的任务，按接取顺序。</summary>
     public IReadOnlyList<QuestRecord> CompletedQuests
     {
@@ -80,32 +94,62 @@ public sealed class QuestManager : MonoBehaviour
     {
         if (ActiveQuest == null || ActiveQuest.IsComplete) return;
         ActiveQuest.progress++;
+        if (ActiveQuest.IsComplete) SfxManager.Instance?.PlayQuestComplete();
         Changed?.Invoke();
     }
 
-    public void RestoreState(int progress, bool accepted, bool rewardClaimed)
+    public void RestoreState(string activeQuestId, int progress, string[] completedQuestIds)
     {
         _records.Clear();
         ActiveQuest = null;
 
-        if (accepted && defaultQuest != null)
+        QuestDefinition activeDef = ResolveQuest(activeQuestId);
+        if (activeDef != null)
         {
             QuestRecord record = new QuestRecord();
-            record.quest = defaultQuest;
-            record.progress = Mathf.Clamp(progress, 0, defaultQuest.targetKills);
-            record.claimed = rewardClaimed;
+            record.quest = activeDef;
+            record.progress = Mathf.Clamp(progress, 0, activeDef.targetKills);
+            record.claimed = false;
             _records.Add(record);
-            if (!rewardClaimed) ActiveQuest = record;
+            ActiveQuest = record;
+        }
+
+        if (completedQuestIds != null)
+        {
+            for (int i = 0; i < completedQuestIds.Length; i++)
+            {
+                QuestDefinition def = ResolveQuest(completedQuestIds[i]);
+                if (def == null) continue;
+                QuestRecord record = new QuestRecord();
+                record.quest = def;
+                record.progress = def.targetKills;
+                record.claimed = true;
+                _records.Add(record);
+            }
         }
 
         Changed?.Invoke();
+    }
+
+    private QuestDefinition ResolveQuest(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+        if (defaultQuest != null && defaultQuest.name == id) return defaultQuest;
+        QuestDefinition[] quests = Resources.FindObjectsOfTypeAll<QuestDefinition>();
+        for (int i = 0; i < quests.Length; i++)
+            if (quests[i] != null && quests[i].name == id) return quests[i];
+        return null;
     }
 
     private void ApplyStatRewards(QuestDefinition quest, PlayerStats stats)
     {
         stats.RestoreHealth(quest.healthReward);
         stats.RestoreMana(quest.manaReward);
-        stats.AddGold(quest.goldReward);
+        if (quest.goldReward > 0)
+        {
+            stats.AddGold(quest.goldReward);
+            SfxManager.Instance?.PlayReward();
+        }
         stats.AttributePoints += quest.attributePointReward;
     }
 

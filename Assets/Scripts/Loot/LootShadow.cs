@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -16,6 +17,7 @@ public sealed class LootShadow : MonoBehaviour
     private LootPanelUI _lootPanel;
     private int _sortingLayerId;
     private int _sortingOrder;
+    private readonly List<LootEntry> _loot = new List<LootEntry>();
 
     private void Awake()
     {
@@ -32,10 +34,12 @@ public sealed class LootShadow : MonoBehaviour
         }
     }
 
-    public void Initialize(int sortingLayerId, int sortingOrder)
+    public void Initialize(int sortingLayerId, int sortingOrder, LootEntry[] loot)
     {
         _sortingLayerId = sortingLayerId;
         _sortingOrder = sortingOrder;
+        _loot.Clear();
+        if (loot != null) _loot.AddRange(loot);
     }
 
     private void Start()
@@ -65,7 +69,7 @@ public sealed class LootShadow : MonoBehaviour
         {
             if (hits[i] == _collider)
             {
-                ResolvePanel()?.Open();
+                ResolvePanel()?.Open(_loot);
                 return;
             }
         }

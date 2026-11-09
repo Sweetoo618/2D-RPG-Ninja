@@ -19,5 +19,7 @@ MonoBehaviour:
   damage: 2
   criticalChance: 15
   criticalMultiplier: 2
+  price: 4
+  maxStack: 99
   projectilePrefab: {fileID: 5057864435005034330, guid: 727d2a794f906ec4abdaa616c3cebfe2, type: 3}
   requiredMana: 2

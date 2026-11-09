@@ -19,10 +19,12 @@ public class PlayerStats : ScriptableObject
     [Header("Health")]
     public float Health;
     public float MaxHealth;
+    public float InitialMaxHealth;
 
     [Header("Mana")]
     public float Mana;
     public float MaxMana;
+    public float InitialMaxMana;
 
     [Header("Exp")] 
     public float CurrentExp;
@@ -46,6 +48,8 @@ public class PlayerStats : ScriptableObject
     
     public void ResetPlayer()
     {
+        MaxHealth = InitialMaxHealth > 0f ? InitialMaxHealth : MaxHealth;
+        MaxMana = InitialMaxMana > 0f ? InitialMaxMana : MaxMana;
         Health = MaxHealth;
         Mana = MaxMana;
         Level = 1;

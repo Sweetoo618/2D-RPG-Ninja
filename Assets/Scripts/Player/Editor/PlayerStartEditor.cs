@@ -10,9 +10,10 @@ public class PlayerStartEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        if (GUILayout.Button("Reset Player"))
+        if (GUILayout.Button("Reset Game"))
         {
             StatsTarget.ResetPlayer();
+            SaveSystem.DeleteSave();
         }
     }
 }

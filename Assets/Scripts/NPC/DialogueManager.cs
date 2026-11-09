@@ -18,6 +18,7 @@ public sealed class DialogueManager : MonoBehaviour
 
     [SerializeField] private DialogueUI dialogueUI;
     private NPCDialogue _activeDialogue;
+    private NPCDialogueLine[] _activeLines;
     private int _lineIndex;
 
     public NPCDialogue ActiveDialogue => _activeDialogue;
@@ -51,9 +52,10 @@ public sealed class DialogueManager : MonoBehaviour
     {
         if (dialogue == null || !dialogue.HasDialogue || dialogueUI == null) return;
         _activeDialogue = dialogue;
+        _activeLines = dialogue.GetActiveLines();
         _lineIndex = 0;
         OpenedFrame = Time.frameCount;
-        dialogueUI.ShowLine(_activeDialogue, _lineIndex);
+        ShowLine();
     }
 
     public void Advance()
@@ -61,15 +63,21 @@ public sealed class DialogueManager : MonoBehaviour
         if (!IsOpen) return;
 
         _lineIndex++;
-        if (_lineIndex >= _activeDialogue.lines.Length)
+        if (_lineIndex >= _activeLines.Length)
         {
             NPCDialogue finished = _activeDialogue;
             End();
+            finished.MarkTalked();
             if (finished.questPanel != null) finished.questPanel.SetActive(true);
             return;
         }
 
-        dialogueUI.ShowLine(_activeDialogue, _lineIndex);
+        ShowLine();
+    }
+
+    private void ShowLine()
+    {
+        dialogueUI.ShowLine(_activeDialogue, _activeLines[_lineIndex]);
     }
 
     public void End()

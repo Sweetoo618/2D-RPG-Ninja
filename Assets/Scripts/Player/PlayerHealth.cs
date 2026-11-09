@@ -6,6 +6,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [SerializeField] private PlayerStats stats;
 
     private PlayerAnimations _playerAnimations;
+    private bool _deadSoundPlayed;
 
     public bool IsDead => stats == null || stats.Health <= 0f;
 
@@ -43,5 +44,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void PlayerDead()
     {
         _playerAnimations.SetDeadAnimation();
+        if (_deadSoundPlayed) return;
+        _deadSoundPlayed = true;
+        SfxManager.Instance?.PlayFailed();
     }
 }

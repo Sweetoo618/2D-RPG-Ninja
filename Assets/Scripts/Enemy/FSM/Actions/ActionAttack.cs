@@ -28,7 +28,11 @@ public class ActionAttack : FSMAction
         {
             IDamageable player =
                 _enemyBrain.Player.GetComponentInParent<IDamageable>();
-            if (player != null) player.TakeDamage(damage);
+            if (player != null)
+            {
+                player.TakeDamage(damage);
+                SfxManager.Instance?.PlayEnemyAttack();
+            }
             _timer = timeBtwAttacks;
         }
     }

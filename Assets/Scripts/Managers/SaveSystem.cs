@@ -12,9 +12,10 @@ public static class SaveSystem
         public float health, mana, maxHealth, maxMana, experience, nextLevelExperience;
         public string scene;
         public float positionX, positionY;
+        public string activeQuestId;
         public int questProgress;
-        public bool questAccepted;
-        public bool questRewardClaimed;
+        public string[] completedQuestIds;
+        public string characterName;
         public string[] weaponNames;
         public int[] weaponQuantities;
         public int equippedWeaponIndex;
@@ -45,9 +46,10 @@ public static class SaveSystem
             nextLevelExperience = stats.NextLevelExp, scene = SceneManager.GetActiveScene().name,
             positionX = playerTransform == null ? 0f : playerTransform.position.x,
             positionY = playerTransform == null ? 0f : playerTransform.position.y,
+            activeQuestId = questManager == null ? string.Empty : questManager.ActiveQuestId,
             questProgress = questManager == null ? 0 : questManager.Progress,
-            questAccepted = questManager != null && questManager.HasActiveQuest,
-            questRewardClaimed = false,
+            completedQuestIds = questManager == null ? null : questManager.CompletedQuestIds,
+            characterName = CharacterSelection.Selected == null ? string.Empty : CharacterSelection.Selected.name,
             weaponNames = inventory == null ? null : inventory.GetWeaponNames(),
             weaponQuantities = inventory == null ? null : inventory.GetWeaponQuantities(),
             equippedWeaponIndex = inventory == null ? -1 : inventory.EquippedIndex,
@@ -57,13 +59,13 @@ public static class SaveSystem
         File.WriteAllText(SavePath, JsonUtility.ToJson(data, true));
     }
 
-    public static bool Load(PlayerStats stats, out string scene, out Vector3 position, out int questProgress, out bool questAccepted, out bool questRewardClaimed, PlayerInventory inventory = null)
+    public static bool Load(PlayerStats stats, out string scene, out Vector3 position, out string activeQuestId, out int questProgress, out string[] completedQuestIds, PlayerInventory inventory = null)
     {
         scene = null;
         position = Vector3.zero;
+        activeQuestId = string.Empty;
         questProgress = 0;
-        questAccepted = false;
-        questRewardClaimed = false;
+        completedQuestIds = null;
         if (stats == null || !File.Exists(SavePath)) return false;
         SaveData data = JsonUtility.FromJson<SaveData>(File.ReadAllText(SavePath));
         if (data == null) return false;
@@ -78,9 +80,10 @@ public static class SaveSystem
         stats.CurrentExp = data.experience; stats.NextLevelExp = data.nextLevelExperience;
         scene = data.scene;
         position = new Vector3(data.positionX, data.positionY, 0f);
+        activeQuestId = data.activeQuestId;
         questProgress = data.questProgress;
-        questAccepted = data.questAccepted;
-        questRewardClaimed = data.questRewardClaimed;
+        completedQuestIds = data.completedQuestIds;
+        CharacterSelection.Selected = ResolveCharacter(data.characterName);
         _pendingWeaponNames = data.weaponNames;
         _pendingWeaponQuantities = data.weaponQuantities;
         _pendingEquippedWeaponIndex = data.equippedWeaponIndex;
@@ -104,5 +107,30 @@ public static class SaveSystem
         _hasPendingInventory = false;
     }
 
+    public static void DeleteSave()
+    {
+        if (File.Exists(SavePath)) File.Delete(SavePath);
+    }
+
+    private static CharacterDefinition ResolveCharacter(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+        CharacterDefinition[] characters = Resources.FindObjectsOfTypeAll<CharacterDefinition>();
+        for (int i = 0; i < characters.Length; i++)
+            if (characters[i] != null && characters[i].name == name) return characters[i];
+        return null;
+    }
+
     public static bool HasSave => File.Exists(SavePath);
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetRuntimeState()
+    {
+        _pendingWeaponNames = null;
+        _pendingWeaponQuantities = null;
+        _pendingEquippedWeaponIndex = -1;
+        _pendingItemIds = null;
+        _pendingItemQuantities = null;
+        _hasPendingInventory = false;
+    }
 }

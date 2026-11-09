@@ -7,7 +7,8 @@ public sealed class InventoryDropTargetUI : MonoBehaviour, IDropHandler
     public enum DropAction
     {
         Equip,
-        Remove
+        Remove,
+        Use
     }
 
     [SerializeField] private InventoryUI inventoryUI;
@@ -17,7 +18,11 @@ public sealed class InventoryDropTargetUI : MonoBehaviour, IDropHandler
     {
         if (inventoryUI == null) inventoryUI = FindObjectOfType<InventoryUI>();
         if (inventoryUI == null) return;
-        if (action == DropAction.Equip) inventoryUI.DropOnEquip();
-        else inventoryUI.DropOnRemove();
+        switch (action)
+        {
+            case DropAction.Equip: inventoryUI.DropOnEquip(); break;
+            case DropAction.Remove: inventoryUI.DropOnRemove(); break;
+            case DropAction.Use: inventoryUI.DropOnUse(); break;
+        }
     }
 }

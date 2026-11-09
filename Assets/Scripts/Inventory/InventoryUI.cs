@@ -144,6 +144,17 @@ public sealed class InventoryUI : MonoBehaviour
         _draggedIndex = -1;
     }
 
+    public void DropOnUse()
+    {
+        if (_inventory == null || _contents == null) return;
+        if (_draggedIndex < 0 || _draggedIndex >= _contents.Length) return;
+
+        InventoryItemStack item = _contents[_draggedIndex].item;
+        if (item != null) _inventory.UseItem(item);
+
+        _draggedIndex = -1;
+    }
+
     public void EndDrag()
     {
         if (_dragGhost != null) Destroy(_dragGhost);

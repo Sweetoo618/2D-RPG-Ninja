@@ -34,11 +34,10 @@ public sealed class DialogueUI : MonoBehaviour
         }
     }
 
-    public void ShowLine(NPCDialogue dialogue, int lineIndex)
+    public void ShowLine(NPCDialogue dialogue, NPCDialogueLine line)
     {
         if (panel == null || dialogue == null) return;
 
-        NPCDialogueLine line = dialogue.lines[lineIndex];
         if (speaker != null)
             speaker.text = string.IsNullOrWhiteSpace(line.speaker) ? dialogue.npcName : line.speaker;
         if (body != null)

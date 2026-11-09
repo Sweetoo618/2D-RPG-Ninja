@@ -5,7 +5,9 @@ public sealed class EnemyRespawner : MonoBehaviour
 {
     [SerializeField] private EnemyHealth enemyPrefab;
     [SerializeField] private int maxAlive = 5;
-    [SerializeField] private float respawnDelay = 6f;
+
+    // 阴影 30 秒消失后再等 1 分钟复活
+    [SerializeField] private float respawnDelay = 90f;
     [SerializeField] private Vector2 spawnArea = new Vector2(8f, 5f);
 
     private int _alive;

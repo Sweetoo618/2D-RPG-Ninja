@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,6 +18,7 @@ public sealed class LootItemContent : MonoBehaviour, IPointerClickHandler
     private Consumable _consumable;
     private int _quantity;
     private PlayerInventory _inventory;
+    private Action _onCollected;
 
     private void Awake()
     {
@@ -27,11 +29,12 @@ public sealed class LootItemContent : MonoBehaviour, IPointerClickHandler
         if (_inventory == null) _inventory = FindObjectOfType<PlayerInventory>();
     }
 
-    public void Initialize(Consumable consumable, int quantity, PlayerInventory inventory)
+    public void Initialize(Consumable consumable, int quantity, PlayerInventory inventory, Action onCollected)
     {
         _consumable = consumable;
         _quantity = quantity;
         _inventory = inventory;
+        _onCollected = onCollected;
 
         if (itemImage != null) itemImage.sprite = consumable == null ? null : consumable.icon;
         if (itemTitle != null) itemTitle.text = consumable == null ? string.Empty : consumable.itemName;
@@ -43,8 +46,8 @@ public sealed class LootItemContent : MonoBehaviour, IPointerClickHandler
     {
         if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
         if (_inventory == null) _inventory = FindObjectOfType<PlayerInventory>();
-        if (_consumable != null && _inventory != null)
-            _inventory.AddConsumable(_consumable, _quantity);
+        if (_consumable == null || _inventory == null || !_inventory.AddConsumable(_consumable, _quantity)) return;
+        _onCollected?.Invoke();
         Destroy(gameObject);
     }
 

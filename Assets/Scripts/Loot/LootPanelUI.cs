@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 战利品面板：打开时根据 LootManager 掉落表实例化物品行，点击 Exit 关闭。
+/// 战利品面板：打开时根据传入的战利品列表实例化物品行，点击 Exit 关闭。
 /// 注意：面板初始为 inactive，Awake 可能不执行，因此 Open 中会再次确保接线。
 /// </summary>
 public sealed class LootPanelUI : MonoBehaviour
@@ -13,9 +13,10 @@ public sealed class LootPanelUI : MonoBehaviour
     [SerializeField] private RectTransform content;
     [SerializeField] private LootItemContent itemPrefab;
     [SerializeField] private Button exitButton;
-    [SerializeField] private PlayerInventory inventory;
+    [SerializeField] private PlayerInventory inventory; 
 
     private readonly List<LootItemContent> _spawned = new List<LootItemContent>();
+    private List<LootEntry> _loot;
 
     private void Awake()
     {
@@ -24,7 +25,7 @@ public sealed class LootPanelUI : MonoBehaviour
         WireExitButton();
     }
 
-    public void Open()
+    public void Open(List<LootEntry> loot)
     {
         if (panel == null) panel = gameObject;
         if (panel.activeSelf) return; // 已打开：不要重复填充（防止点击物品时被阴影点击重置）
@@ -36,15 +37,27 @@ public sealed class LootPanelUI : MonoBehaviour
 
         panel.SetActive(true);
 
-        if (LootManager.Instance == null || itemPrefab == null || content == null) return;
+        _loot = loot;
+        BuildRows();
+    }
 
-        foreach (Consumable consumable in LootManager.Instance.LootTable)
+    private void BuildRows()
+    {
+        if (_loot == null || itemPrefab == null || content == null) return;
+
+        for (int i = 0; i < _loot.Count; i++)
         {
-            if (consumable == null) continue;
-            LootItemContent entry = Instantiate(itemPrefab, content);
-            entry.Initialize(consumable, LootManager.Instance.LootQuantity, inventory);
-            _spawned.Add(entry);
+            LootEntry entry = _loot[i];
+            if (entry.item == null) continue;
+            LootItemContent row = Instantiate(itemPrefab, content);
+            row.Initialize(entry.item, Mathf.Max(1, entry.quantity), inventory, () => RemoveLoot(entry));
+            _spawned.Add(row);
         }
+    }
+
+    private void RemoveLoot(LootEntry entry)
+    {
+        _loot?.Remove(entry);
     }
 
     public void Close()

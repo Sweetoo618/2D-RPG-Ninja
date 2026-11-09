@@ -13,10 +13,12 @@ public sealed class ShopItemUI : MonoBehaviour
     [SerializeField] private Button addButton;
     [SerializeField] private Button subButton;
 
-    private Food _food;
-    private PlayerInventory _inventory;
     private PlayerStats _stats;
+    private int _price;
+    private int _maxQuantity = 1;
     private int _quantity = 1;
+    private Func<int, bool> _canBuy;
+    private Func<int, bool> _onBuy;
 
     private void Awake()
     {
@@ -40,29 +42,48 @@ public sealed class ShopItemUI : MonoBehaviour
         if (subButton != null) subButton.onClick.RemoveListener(SubtractQuantity);
     }
 
-    public void Bind(Food food, PlayerInventory inventory, PlayerStats stats)
+    public void Bind(Consumable consumable, PlayerInventory inventory, PlayerStats stats)
     {
-        _food = food;
-        _inventory = inventory;
+        if (consumable == null) return;
+        long capacity = Mathf.Max(1, inventory != null ? inventory.Capacity : 1);
+        int maxQuantity = (int)Math.Min((long)consumable.maxStack * capacity, int.MaxValue);
+        Bind(consumable.icon, consumable.itemName, consumable.price, maxQuantity, stats,
+            amount => inventory != null && inventory.CanAddConsumable(consumable, amount),
+            amount => inventory.AddConsumable(consumable, amount));
+    }
+
+    public void Bind(Weapon weapon, PlayerInventory inventory, PlayerStats stats)
+    {
+        if (weapon == null) return;
+        Bind(weapon.icon, weapon.weaponName, weapon.price, Mathf.Max(1, weapon.maxStack), stats,
+            amount => inventory != null && inventory.CanAddWeapon(weapon, amount),
+            amount => inventory.AddWeapon(weapon, amount));
+    }
+
+    private void Bind(Sprite icon, string title, int price, int maxQuantity, PlayerStats stats,
+        Func<int, bool> canBuy, Func<int, bool> onBuy)
+    {
         _stats = stats;
+        _price = price;
+        _maxQuantity = Mathf.Max(1, maxQuantity);
         _quantity = 1;
+        _canBuy = canBuy;
+        _onBuy = onBuy;
 
         if (itemImage != null)
         {
-            itemImage.sprite = food != null ? food.icon : null;
+            itemImage.sprite = icon;
             itemImage.preserveAspect = true;
         }
-        if (itemTitle != null) itemTitle.text = food != null ? food.itemName : string.Empty;
-        if (coinNum != null) coinNum.text = food != null ? food.price.ToString() : "0";
+        if (itemTitle != null) itemTitle.text = title ?? string.Empty;
+        if (coinNum != null) coinNum.text = price.ToString();
 
         RefreshQuantity();
     }
 
     private void AddQuantity()
     {
-        if (_food == null) return;
-        long maxQuantity = (long)Mathf.Max(1, _food.maxStack) * Mathf.Max(1, _inventory != null ? _inventory.Capacity : 1);
-        _quantity = (int)Math.Min(maxQuantity, (long)_quantity + 1);
+        _quantity = (int)Math.Min((long)_maxQuantity, (long)_quantity + 1);
         RefreshQuantity();
     }
 
@@ -74,14 +95,14 @@ public sealed class ShopItemUI : MonoBehaviour
 
     private void Buy()
     {
-        if (_food == null || _inventory == null || _stats == null) return;
+        if (_onBuy == null || _canBuy == null || _stats == null) return;
 
-        long totalCost = (long)_food.price * _quantity;
+        long totalCost = (long)_price * _quantity;
         if (totalCost > int.MaxValue || _stats.Gold < totalCost) return;
-        if (!_inventory.CanAddConsumable(_food, _quantity)) return;
+        if (!_canBuy(_quantity)) return;
         if (totalCost > 0 && !_stats.SpendGold((int)totalCost)) return;
 
-        if (!_inventory.AddConsumable(_food, _quantity) && totalCost > 0)
+        if (!_onBuy(_quantity) && totalCost > 0)
             _stats.AddGold((int)totalCost);
     }
 

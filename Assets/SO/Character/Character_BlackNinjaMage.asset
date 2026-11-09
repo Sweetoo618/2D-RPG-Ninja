@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 997b72b742181cc43a629063acc64b5c, type: 3}
+  m_Name: Character_BlackNinjaMage
+  m_EditorClassIdentifier: 
+  displayName: BlackNinjaMage
+  previewSprite: {fileID: 862859637, guid: bf09e5a142b522a4a8edb0d900f074d0, type: 3}
+  previewFrames:
+  - {fileID: -497388414, guid: bf09e5a142b522a4a8edb0d900f074d0, type: 3}
+  - {fileID: -813109122, guid: bf09e5a142b522a4a8edb0d900f074d0, type: 3}
+  - {fileID: 723978956, guid: bf09e5a142b522a4a8edb0d900f074d0, type: 3}
+  portrait: {fileID: 21300000, guid: 57d94e068d79c864bbc32d02e77b41c2, type: 3}
+  animatorController: {fileID: 22100000, guid: f5d45283b6a5f404fa08de922420a07e, type: 2}

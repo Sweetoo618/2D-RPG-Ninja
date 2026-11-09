@@ -9,6 +9,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [SerializeField] private float dropExperience = 10f;
     [SerializeField] private float dropHealthRestore = 0f;
     [SerializeField] private int goldReward = 5;
+
+    [Header("Loot")]
+    [SerializeField] private LootEntry[] loot;
     
     public float CurrentHealth { get; private set; }
 
@@ -54,6 +57,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         {
             _isDead = true;
             CurrentHealth = 0f;
+            SfxManager.Instance?.PlayEnemyDie();
             if (_animator != null) _animator.SetTrigger("Dead");
             if (_enemyBrain != null) _enemyBrain.enabled = false;
             _enemySelector?.NoSelectionCallback();
@@ -66,6 +70,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             SpawnLootShadow();
             GetComponentInParent<EnemyRespawner>()?.NotifyEnemyDefeated();
             StartCoroutine(DisableAfterDeath());
+        }
+        else
+        {
+            SfxManager.Instance?.PlayEnemyInjure();
         }
     }
 
@@ -85,7 +93,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         SpriteRenderer sourceRenderer = GetComponent<SpriteRenderer>();
         shadowObject.GetComponent<LootShadow>().Initialize(
             sourceRenderer == null ? 0 : sourceRenderer.sortingLayerID,
-            sourceRenderer == null ? 0 : sourceRenderer.sortingOrder);
+            sourceRenderer == null ? 0 : sourceRenderer.sortingOrder,
+            loot);
     }
 
     private System.Collections.IEnumerator DisableAfterDeath()

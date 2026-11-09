@@ -128,6 +128,32 @@ public sealed class PlayerInventory : MonoBehaviour
         return true;
     }
 
+    /// <summary>购入指定数量武器：已拥有则累加数量，否则新增槽位。</summary>
+    public bool AddWeapon(Weapon weapon, int amount)
+    {
+        if (!CanAddWeapon(weapon, amount)) return false;
+        int stack = Mathf.Max(1, weapon.maxStack);
+        int index = _weapons.IndexOf(weapon);
+        if (index >= 0)
+            _weaponQuantities[index] = Mathf.Min(stack, _weaponQuantities[index] + amount);
+        else
+        {
+            _weapons.Add(weapon);
+            _weaponQuantities.Add(Mathf.Min(stack, amount));
+        }
+        Changed?.Invoke();
+        return true;
+    }
+
+    public bool CanAddWeapon(Weapon weapon, int amount)
+    {
+        if (weapon == null || amount <= 0) return false;
+        int index = _weapons.IndexOf(weapon);
+        if (index >= 0)
+            return _weaponQuantities[index] + amount <= Mathf.Max(1, weapon.maxStack);
+        return _weapons.Count + _items.Count < capacity;
+    }
+
     public bool RemoveWeapon(Weapon weapon)
     {
         int index = _weapons.IndexOf(weapon);
@@ -274,6 +300,11 @@ public sealed class PlayerInventory : MonoBehaviour
         _player.Stats.RestoreMana(item.manaRestore);
         _playerExp?.AddExp(item.expRestore);
         return RemoveItem(index);
+    }
+
+    public bool UseItem(InventoryItemStack item)
+    {
+        return item != null && UseItem(_items.IndexOf(item));
     }
 
     public string[] GetItemIds()

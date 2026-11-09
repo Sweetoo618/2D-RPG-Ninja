@@ -25,12 +25,28 @@ public sealed class NPCDialogue : MonoBehaviour
     public Sprite portrait;
 
     [Header("Dialogue")]
-    [Tooltip("对话内容，按顺序播放")]
+    [Tooltip("首次对话内容，按顺序播放")]
     public NPCDialogueLine[] lines;
+
+    [Header("Repeat Dialogue")]
+    [Tooltip("非首次对话内容（留空则始终复用 lines）")]
+    public NPCDialogueLine[] repeatLines;
 
     [Header("After Dialogue")]
     [Tooltip("对话结束后弹出的面板（可留空）")]
     public GameObject questPanel;
 
     public bool HasDialogue => lines != null && lines.Length > 0;
+
+    public bool HasTalked { get; private set; }
+
+    public NPCDialogueLine[] GetActiveLines()
+    {
+        return HasTalked && repeatLines != null && repeatLines.Length > 0 ? repeatLines : lines;
+    }
+
+    public void MarkTalked()
+    {
+        HasTalked = true;
+    }
 }

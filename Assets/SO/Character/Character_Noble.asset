@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 997b72b742181cc43a629063acc64b5c, type: 3}
+  m_Name: Character_Noble
+  m_EditorClassIdentifier: 
+  displayName: Noble
+  previewSprite: {fileID: -1625783215, guid: 188c14d9822f02e4cbca6ec4e41f283c, type: 3}
+  previewFrames:
+  - {fileID: 360813393, guid: 188c14d9822f02e4cbca6ec4e41f283c, type: 3}
+  - {fileID: -1399279625, guid: 188c14d9822f02e4cbca6ec4e41f283c, type: 3}
+  - {fileID: 1573186296, guid: 188c14d9822f02e4cbca6ec4e41f283c, type: 3}
+  portrait: {fileID: 21300000, guid: 5313a8235fa0ae848b38d51cc076e033, type: 3}
+  animatorController: {fileID: 22100000, guid: 929782e6d8b20a94d9c37a0f5a803da4, type: 2}

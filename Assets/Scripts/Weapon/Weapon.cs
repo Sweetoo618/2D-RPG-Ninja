@@ -22,6 +22,8 @@ public class Weapon : ScriptableObject
     public float damage;
     [Range(0f, 100f)] public float criticalChance;
     [Min(1f)] public float criticalMultiplier = 2f;
+    [Min(0)] public int price;
+    [Min(1)] public int maxStack = 99;
 
     [Header("Projectile")]
     public Projectile projectilePrefab;

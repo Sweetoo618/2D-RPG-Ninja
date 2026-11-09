@@ -39,7 +39,11 @@ public sealed class EnemyDrop : MonoBehaviour
         if (exp != null) exp.AddExp(experience);
         if (healthRestore > 0f && player.Stats != null)
             player.Stats.RestoreHealth(healthRestore);
-        if (gold > 0 && player.Stats != null) player.Stats.AddGold(gold);
+        if (gold > 0 && player.Stats != null)
+        {
+            player.Stats.AddGold(gold);
+            SfxManager.Instance?.PlayReward();
+        }
         Destroy(gameObject);
     }
 }

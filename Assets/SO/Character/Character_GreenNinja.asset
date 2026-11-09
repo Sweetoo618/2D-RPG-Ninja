@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 997b72b742181cc43a629063acc64b5c, type: 3}
+  m_Name: Character_GreenNinja
+  m_EditorClassIdentifier: 
+  displayName: GreenNinja
+  previewSprite: {fileID: -1890032406, guid: ba49b3f29447de540b931b854fa7a9aa, type: 3}
+  previewFrames:
+  - {fileID: 2024665858, guid: ba49b3f29447de540b931b854fa7a9aa, type: 3}
+  - {fileID: 1466930917, guid: ba49b3f29447de540b931b854fa7a9aa, type: 3}
+  - {fileID: 1185806288, guid: ba49b3f29447de540b931b854fa7a9aa, type: 3}
+  portrait: {fileID: 21300000, guid: 82082cf0f8411bb4e8c317128686e63a, type: 3}
+  animatorController: {fileID: 9100000, guid: 2d28a8f16771ebf4e87316b8db2b9582, type: 2}

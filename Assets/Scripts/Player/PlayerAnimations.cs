@@ -16,6 +16,7 @@ public class PlayerAnimations : MonoBehaviour
     private void Awake()
     {
         _animator = GetComponent<Animator>();
+        CharacterSelection.Apply(_animator);
     }
 
     public void SetDeadAnimation()

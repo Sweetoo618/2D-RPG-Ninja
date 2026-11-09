@@ -15,8 +15,10 @@ MonoBehaviour:
   Level: 1
   Health: 20
   MaxHealth: 20
+  InitialMaxHealth: 20
   Mana: 20
   MaxMana: 20
+  InitialMaxMana: 20
   CurrentExp: 0
   NextLevelExp: 100
   InitialNextLevelExp: 100

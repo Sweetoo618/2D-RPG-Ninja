@@ -84,6 +84,7 @@ public class PlayerAttack : MonoBehaviour
         }
         if (_currentWeapon.weaponType == WeaponType.Melee)
         {
+            SfxManager.Instance?.PlaySiu();
             if (slashEffectPrefab != null)
             {
                 Instantiate(slashEffectPrefab, _currentAttackPosition.position, Quaternion.identity);
@@ -132,6 +133,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void FireProjectile(float damage)
     {
+        SfxManager.Instance?.PlayBow();
         Projectile projectile = Instantiate(_currentWeapon.projectilePrefab,
             _currentAttackPosition.position, Quaternion.identity);
         projectile.Direction = GetFacingDirection();
