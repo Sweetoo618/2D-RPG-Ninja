@@ -4,15 +4,20 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Header("Config")]
     [SerializeField] private PlayerStats stats;
+    [SerializeField] private PlayerDeathPanel deathPanel;
 
     private PlayerAnimations _playerAnimations;
-    private bool _deadSoundPlayed;
+    private PlayerMovement _playerMovement;
+    private PlayerAttack _playerAttack;
+    private bool _deathHandled;
 
     public bool IsDead => stats == null || stats.Health <= 0f;
 
     private void Awake()
     {
         _playerAnimations = GetComponent<PlayerAnimations>();
+        _playerMovement = GetComponent<PlayerMovement>();
+        _playerAttack = GetComponent<PlayerAttack>();
     }
 
     private void Update()
@@ -44,8 +49,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void PlayerDead()
     {
         _playerAnimations.SetDeadAnimation();
-        if (_deadSoundPlayed) return;
-        _deadSoundPlayed = true;
+        if (_deathHandled) return;
+        _deathHandled = true;
         SfxManager.Instance?.PlayFailed();
+        if (_playerMovement != null) _playerMovement.enabled = false;
+        if (_playerAttack != null) _playerAttack.enabled = false;
+        SaveSystem.DeleteSave();
+        if (deathPanel != null) deathPanel.Show();
     }
 }

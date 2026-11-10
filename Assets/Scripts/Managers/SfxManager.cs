@@ -18,9 +18,21 @@ public class SfxManager : MonoBehaviour
     [SerializeField] private AudioClip questComplete;
     [SerializeField] private AudioClip failed;
 
+    private float _baseVolume;
+
     private void Awake()
     {
         Instance = this;
+        if (source != null) _baseVolume = source.volume;
+        ApplyVolume();
+        GameAudioSettings.Changed += ApplyVolume;
+    }
+
+    private void OnDestroy() => GameAudioSettings.Changed -= ApplyVolume;
+
+    private void ApplyVolume()
+    {
+        if (source != null) source.volume = _baseVolume * GameAudioSettings.SoundVolume;
     }
 
     public void PlayBow() => Play(bow);

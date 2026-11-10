@@ -56,11 +56,16 @@ public sealed class StartMenuUI : MonoBehaviour
         if (_isLoading) return;
         if (modeDropdown != null && modeDropdown.value != SingleMode) return;
 
-        // 选 Load Game 且存在存档才续档，否则一律按 New Game 重开。
-        bool continueGame = singleSelectDropdown != null
-            && singleSelectDropdown.value != NewGameOption
-            && SaveSystem.HasSave;
-        if (!continueGame) ResetForNewGame();
+        bool loadGame = singleSelectDropdown != null && singleSelectDropdown.value != NewGameOption;
+        if (loadGame)
+        {
+            // 无存档时不允许进入游戏
+            if (!SaveSystem.HasSave) return;
+        }
+        else
+        {
+            ResetForNewGame();
+        }
         LoadGameScene();
     }
 

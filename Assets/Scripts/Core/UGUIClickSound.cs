@@ -10,10 +10,26 @@ public sealed class UGUIClickSound : MonoBehaviour
     [SerializeField] private AudioClip clip;
 
     private readonly List<RaycastResult> _results = new List<RaycastResult>();
+    private float _baseVolume;
+
+    private void Awake()
+    {
+        if (source == null) return;
+        _baseVolume = source.volume;
+        ApplyVolume();
+        GameAudioSettings.Changed += ApplyVolume;
+    }
+
+    private void OnDestroy() => GameAudioSettings.Changed -= ApplyVolume;
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(0)) PlayIfOnSelectable(Input.mousePosition);
+    }
+
+    private void ApplyVolume()
+    {
+        if (source != null) source.volume = _baseVolume * GameAudioSettings.SoundVolume;
     }
 
     private void PlayIfOnSelectable(Vector2 screenPosition)

@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 
 public sealed class SceneTransition : MonoBehaviour
 {
-    private static bool _autoLoaded;
     private static bool _hasPendingSceneRestore;
     private static Vector3 _pendingPosition;
     private static string _pendingActiveQuestId;
@@ -15,6 +14,7 @@ public sealed class SceneTransition : MonoBehaviour
     private Player _player;
     private QuestManager _questManager;
     private PlayerInventory _inventory;
+    private bool _autoLoaded;
 
     public static SceneTransition Instance { get; private set; }
 
@@ -39,7 +39,6 @@ public sealed class SceneTransition : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetRuntimeState()
     {
-        _autoLoaded = false;
         _hasPendingSceneRestore = false;
         _pendingActiveQuestId = null;
         _pendingQuestProgress = 0;
@@ -89,6 +88,7 @@ public sealed class SceneTransition : MonoBehaviour
         SceneManager.sceneLoaded -= HandleSceneLoaded;
         if (!_hasPendingSceneRestore) return;
         _hasPendingSceneRestore = false;
+        _autoLoaded = true;
         StartCoroutine(RestoreAfterSceneLoad(_pendingPosition, _pendingActiveQuestId, _pendingQuestProgress, _pendingCompletedQuestIds));
     }
 
@@ -117,7 +117,6 @@ public sealed class SceneTransition : MonoBehaviour
     private void OnApplicationQuit()
     {
         SaveSystem.Save(stats, _player == null ? null : _player.transform, _questManager, _inventory);
-        _autoLoaded = false;
         _hasPendingSceneRestore = false;
     }
 }

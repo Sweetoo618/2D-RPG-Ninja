@@ -24,7 +24,8 @@ public sealed class NPCInteractable : MonoBehaviour
 
     private Canvas _canvas;
     private RectTransform _canvasRect;
-    private Camera _camera;
+    private Camera _worldCamera;
+    private Camera _uiCamera;
     private RectTransform _prompt;
     private bool _dismissed;
 
@@ -82,12 +83,26 @@ public sealed class NPCInteractable : MonoBehaviour
         if (_prompt != null || interactPromptPrefab == null) return;
 
         _canvas = GetComponentInParent<Canvas>();
-        if (_canvas == null) _canvas = FindObjectOfType<Canvas>();
+        if (_canvas == null) _canvas = FindSceneCanvas();
         if (_canvas == null) return;
 
         _canvasRect = (RectTransform)_canvas.transform;
-        _camera = _canvas.worldCamera != null ? _canvas.worldCamera : Camera.main;
+        _worldCamera = Camera.main;
+        _uiCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay
+            ? null
+            : (_canvas.worldCamera != null ? _canvas.worldCamera : Camera.main);
         _prompt = Instantiate(interactPromptPrefab, _canvas.transform).GetComponent<RectTransform>();
+    }
+
+    // 只使用本场景的画布，避免提示挂到跨场景保留的画布上无法随场景销毁。
+    private Canvas FindSceneCanvas()
+    {
+        Canvas[] canvases = FindObjectsOfType<Canvas>();
+        for (int i = 0; i < canvases.Length; i++)
+        {
+            if (canvases[i].gameObject.scene == gameObject.scene) return canvases[i];
+        }
+        return null;
     }
 
     private void DestroyPrompt()
@@ -100,11 +115,11 @@ public sealed class NPCInteractable : MonoBehaviour
     // 把互动 UI 放到 NPC 头顶：世界坐标 -> 屏幕 -> 画布局部坐标。
     private void FollowHead()
     {
-        if (_prompt == null || _canvasRect == null || _camera == null) return;
+        if (_prompt == null || _canvasRect == null || _worldCamera == null) return;
 
-        Vector3 screenPoint = _camera.WorldToScreenPoint(transform.position + promptOffset);
+        Vector3 screenPoint = _worldCamera.WorldToScreenPoint(transform.position + promptOffset);
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _canvasRect, screenPoint, _camera, out Vector2 localPoint))
+                _canvasRect, screenPoint, _uiCamera, out Vector2 localPoint))
         {
             _prompt.anchoredPosition = localPoint;
         }

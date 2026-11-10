@@ -39,7 +39,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         _isDead = false;
         CurrentHealth = Mathf.Max(health, 1f);
         if (_enemyBrain != null) _enemyBrain.enabled = true;
-        if (_animator != null) _animator.ResetTrigger("Dead");
+        // 重置动画状态，避免复活后停留在死亡帧
+        if (_animator != null) _animator.Rebind();
         gameObject.layer = LayerMask.NameToLayer("Enemy");
     }
 
@@ -68,7 +69,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             FindObjectOfType<QuestManager>()?.RegisterKill();
             SpawnDrop();
             SpawnLootShadow();
-            GetComponentInParent<EnemyRespawner>()?.NotifyEnemyDefeated();
+            GetComponentInParent<EnemyRespawner>()?.NotifyEnemyDefeated(this);
             StartCoroutine(DisableAfterDeath());
         }
         else

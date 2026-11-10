@@ -34,7 +34,7 @@ public static class SaveSystem
 
     public static void Save(PlayerStats stats, Transform playerTransform = null, QuestManager questManager = null, PlayerInventory inventory = null)
     {
-        if (stats == null) return;
+        if (stats == null || stats.Health <= 0f) return;
         SaveData data = new SaveData
         {
             level = stats.Level, attributePoints = stats.AttributePoints,

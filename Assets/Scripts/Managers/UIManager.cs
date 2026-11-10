@@ -26,11 +26,6 @@ public class UIManager : MonoBehaviour
             Player player = FindObjectOfType<Player>();
             if (player != null) stats = player.Stats;
         }
-        if (goldTMP == null)
-        {
-            GameObject goldAmount = GameObject.Find("GoldAmount");
-            if (goldAmount != null) goldTMP = goldAmount.GetComponent<TextMeshProUGUI>();
-        }
     }
 
     private void Update()
